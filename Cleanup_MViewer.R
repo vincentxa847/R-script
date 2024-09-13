@@ -54,5 +54,5 @@ MViewer_cleanup <-function(input_filePath){
 }
 
 # OUTPUT THE ORIGINAL TABLE FROM MVIEWER (ONLY MAF<0.01) 
-N1675_cleanup = MViewer_cleanup("D:/DS Project_Vincent/Data/N1675/N1675-MAF0.01.tsv")
-AI3008_cleanup = MViewer_cleanup("D:/DS Project_Vincent/Data/AI3008/AI3008-MAF0.01.tsv")
+N1675_MAF0.01 = MViewer_cleanup("D:/DS Project_Vincent/Data/N1675/N1675-MAF0.01.tsv")
+AI3008_MAF0.01 = MViewer_cleanup("D:/DS Project_Vincent/Data/AI3008/AI3008-MAF0.01.tsv")
