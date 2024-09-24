@@ -22,6 +22,7 @@ HSA189451_heme <- read.table("../GENE_LIST/HSA189451_heme.txt", header = FALSE, 
 CL8946_folic_acid <- read.table("../GENE_LIST/CL8946_folic_acid.txt", header = FALSE, sep = "\t", stringsAsFactors = FALSE)
 
 #### HPO gene list ####
+# HP0006695 : ECD
 HP0006695 <- read.table("../GENE_LIST/genes_for_HP_0006695", header = TRUE, sep = "\t", stringsAsFactors = FALSE)$name
 HP0006695 <- trimws(HP0006695)
 
@@ -68,4 +69,34 @@ hsa04340_hedgedog_AI3008_MAF0.01 = gene_list(AI3008_MAF0.01,hsa04340_hedgedog)
 CL8946_folic_acid_AI3008_MAF0.01 = gene_list(AI3008_MAF0.01,CL8946_folic_acid)
 HSA189451_heme_AI3008_MAF0.01 = gene_list(AI3008_MAF0.01,HSA189451_heme)
 HP0006695_AI3008_MAF0.01 = AI3008_MAF0.01 %>% filter(Gene_refgene %in% HP0006695)
+
+# D25029 (DS-ECD)
+top_candidate_genes_D25029_MAF0.01 = D25029_MAF0.01 %>% filter(Gene_refgene %in% top_candidate_genes)
+top_candidate_related_genes_D25029_MAF0.01 = gene_list(D25029_MAF0.01,top_candidate_related_genes)
+candidate_genes_D25029_MAF0.01 = gene_list(D25029_MAF0.01,candidate_genes)
+ECM_interaction_D25029_MAF0.01 = gene_list(D25029_MAF0.01,ECM_interaction)
+hsa04310_Wnt_D25029_MAF0.01 = gene_list(D25029_MAF0.01,hsa04310_Wnt)
+cilium_D25029_MAF0.01 = gene_list(D25029_MAF0.01,cilium)
+hsa04330_Notch_D25029_MAF0.01 = gene_list(D25029_MAF0.01,hsa04330_Notch)
+hsa04310_Wnt_D25029_MAF0.01 = gene_list(D25029_MAF0.01,hsa04310_Wnt)
+hsa04340_hedgedog_D25029_MAF0.01 = gene_list(D25029_MAF0.01,hsa04340_hedgedog)
+CL8946_folic_acid_D25029_MAF0.01 = gene_list(D25029_MAF0.01,CL8946_folic_acid)
+HSA189451_heme_D25029_MAF0.01 = gene_list(D25029_MAF0.01,HSA189451_heme)
+HP0006695_D25029_MAF0.01 = D25029_MAF0.01 %>% filter(Gene_refgene %in% HP0006695)
+Curated_AVSD_genelist_D25029_MAF0.01 = gene_list(D25029_MAF0.01,Curated_AVSD_genelist)
+
+# D25046 (DS-ECD)
+top_candidate_genes_D25046_MAF0.01 = D25046_MAF0.01 %>% filter(Gene_refgene %in% top_candidate_genes)
+top_candidate_related_genes_D25046_MAF0.01 = gene_list(D25046_MAF0.01,top_candidate_related_genes)
+candidate_genes_D25046_MAF0.01 = gene_list(D25046_MAF0.01,candidate_genes)
+ECM_interaction_D25046_MAF0.01 = gene_list(D25046_MAF0.01,ECM_interaction)
+hsa04310_Wnt_D25046_MAF0.01 = gene_list(D25046_MAF0.01,hsa04310_Wnt)
+cilium_D25046_MAF0.01 = gene_list(D25046_MAF0.01,cilium)
+hsa04330_Notch_D25046_MAF0.01 = gene_list(D25046_MAF0.01,hsa04330_Notch)
+hsa04310_Wnt_D25046_MAF0.01 = gene_list(D25046_MAF0.01,hsa04310_Wnt)
+hsa04340_hedgedog_D25046_MAF0.01 = gene_list(D25046_MAF0.01,hsa04340_hedgedog)
+CL8946_folic_acid_D25046_MAF0.01 = gene_list(D25046_MAF0.01,CL8946_folic_acid)
+HSA189451_heme_D25046_MAF0.01 = gene_list(D25046_MAF0.01,HSA189451_heme)
+HP0006695_D25046_MAF0.01 = D25046_MAF0.01 %>% filter(Gene_refgene %in% HP0006695)
+Curated_AVSD_genelist_D25046_MAF0.01 = gene_list(D25046_MAF0.01,Curated_AVSD_genelist)
 
