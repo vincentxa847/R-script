@@ -41,7 +41,26 @@ gene_list <- function(input, genelist) {
   return(output)
 }
 
+#### Gene in gene list and pass filter for IPA ####
+# Extract the "Gene_refgene" column and output as txt file
+writeout_list <- function(table, gene_list, output_name){
+  # In genelist
+  output <- table %>% 
+    filter(Gene_refgene %in% gene_list)
+  # Pass filter (synonymous)
+  # output <- subset(output, ExonicFunc_refgene == "nonsynonymous SNV")
+  # Extract gene column
+  output <- output$Gene_refgene 
+  
+  file_path <- paste0("../IPA/", output_name, ".txt")
+  
+  # Write to a text file
+  write.table(output, file = file_path, row.names = FALSE, col.names = FALSE, quote = FALSE)
+}
 
+out <- writeout_list(D25007_MAF0.01, HP0006695,"D25007_MAF0.01_HP0006695")  
+
+#### Analyze separately ####
 # N1675
 top_candidate_genes_N1675_MAF0.01 = N1675_MAF0.01 %>% filter(Gene_refgene %in% top_candidate_genes)
 top_candidate_related_genes_N1675_MAF0.01 = gene_list(N1675_MAF0.01,top_candidate_related_genes)
