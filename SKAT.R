@@ -45,6 +45,7 @@ generate_SKAT_data <- function(case_list, control_list, gene_list) {
   }
   
   # Create an empty genotype matrix with all variants as columns and samples as rows
+  # default value is 0, which means homozygous for the major allele (no variant)
   genotype_matrix <- matrix(0, nrow = length(genotype_list), ncol = length(all_variants))
   colnames(genotype_matrix) <- all_variants
   rownames(genotype_matrix) <- sample_names
