@@ -77,6 +77,11 @@ nonDS_ECD <- list(D25007_MAF0.01_missense)
 ## Generate the genotype matrix and phenotype vector for SKAT analysis
 skat_data <- generate_SKAT_data(DS_ECD, nonDS_ECD, cilium_components)
 
-## Run SKAT
+## Run SKAT-O
+# Creating the Null Model, which represents the baseline against which the alternative hypothesis
+# Not using covariate here (~ 1), which come from PLINK PCA and Sex
+# case-control status (out_type = "D"),  "C" for the continuous outcome and "D" for the dichotomous outcome
 null_model <- SKAT_Null_Model(skat_data$phenotype_vector ~ 1, out_type = "D")
-skat_result <- SKAT(skat_data$genotype_matrix, null_model)
+# method="optimal.adj" represent SKAT-O, default= "davies"
+# weights.beta use default value c(1,25)
+skat_result <- SKAT(skat_data$genotype_matrix, null_model,kernel="linear.weighted", method="optimal.adj", weights.beta=c(1,25))
