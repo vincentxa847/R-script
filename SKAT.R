@@ -74,6 +74,12 @@ cilium_components <- read.csv("../GENE_LIST/cilium_components.txt",
 DS_ECD <- list(D25029_MAF0.01_missense, D25046_MAF0.01_missense)
 nonDS_ECD <- list(D25007_MAF0.01_missense)
 
+##  Define covariate (for now sample size is too small (n=3) to include covariate)
+# include sex as covariate (1 = Male, 0 = Female)
+sex_vector <- c(1, 0, 0)  # D25029:M, D25046:F, D25007:F
+# Create a data frame for covariates
+covariate_df <- data.frame(sex = sex_vector)
+
 ## Generate the genotype matrix and phenotype vector for SKAT analysis
 skat_data <- generate_SKAT_data(DS_ECD, nonDS_ECD, cilium_components)
 
