@@ -42,11 +42,11 @@ Fisher_mutation_burden <- function(case, control) {
   
   # Count how many samples in the case group have at least one variant
   samples_with_variants_case <- sum(colSums(as.data.frame(case[,-1])) > 0)  # Count of samples with at least one variant
-  total_case_samples <- nrow(case)  # Total number of samples in case group
+  total_case_samples <- ncol(case)  # Total number of samples in case group
   
   # Count how many samples in the control group have at least one variant
   samples_with_variants_control <- sum(colSums(as.data.frame(control[,-1])) > 0)  # Count of samples with at least one variant
-  total_control_samples <- nrow(control)  # Total number of samples in control group
+  total_control_samples <- ncol(control)  # Total number of samples in control group
   
   # Calculate the number of samples without variants
   samples_without_variants_case <- total_case_samples - samples_with_variants_case
