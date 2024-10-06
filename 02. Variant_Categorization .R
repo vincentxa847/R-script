@@ -57,11 +57,18 @@ group_variants_and_save <- function(data,output_name) {
   # 14. loss of function (unsure the criteria, skip now)
   # pass
   
-  ## Prepare genesymbol worksheet
+  ## Prepare genesymbol worksheet and Sort each group by CADD_phred
   # Create a list to hold Gene_refgene columns for all groups
   gene_refgene_list <- list()
   # Loop through each variant group and extract Gene_refgene
   for (group_name in names(variant_groups)) {
+    
+    # Sort each group by CADD_phred
+    if ("CADD_phred" %in% colnames(variant_groups[[group_name]])) {
+      variant_groups[[group_name]] <- variant_groups[[group_name]] %>%
+        arrange(desc(CADD_phred))  # Sort in descending order by CADD_phred
+    }
+    
     gene_column <- variant_groups[[group_name]]$Gene_refgene
     
     # Fill with empty string for unequal lengths
