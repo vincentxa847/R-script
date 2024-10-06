@@ -29,21 +29,18 @@ MViewer_cleanup <-function(input_filePath){
   # Remove the first row, which is now the column names
   combined_data <- combined_data[-1, ]
   
+  # Define the columns to move to the front
+  front_columns <- c("Gene_refgene", "ExonicFunc_refgene", "CADD_phred", "REVEL_score", "Severity_Score", "dbSNP", "ClinVar", "Max_Allele_Freq", "Taiwan_Biobank","Nucleotide" ,"AAChange")
   
-  # Ensure column names are trimmed and then check for the presence of the required columns
-  if (all(c("Gene_refgene", "ExonicFunc_refgene", "CADD_phred", "REVEL_score") %in% trimws(colnames(combined_data)))) {
-    # Define the columns to move to the front
-    front_columns <- c("Gene_refgene", "ExonicFunc_refgene", "CADD_phred", "REVEL_score", "Severity_Score", "dbSNP", "ClinVar", "Max_Allele_Freq", "Taiwan_Biobank","Nucleotide" ,"AAChange")
-    
-    # Get all column names
-    all_columns <- trimws(colnames(combined_data))
-    
-    # Define the columns to keep (excluding "Item" and columns already in front_columns)
-    other_columns <- setdiff(all_columns, c(front_columns, "Item"))
-    
-    # Reorder columns
-    combined_data <- combined_data[, c(front_columns, other_columns)]
-  }
+  # Get all column names
+  all_columns <- trimws(colnames(combined_data))
+  
+  # Define the columns to keep (excluding "Item" and columns already in front_columns)
+  other_columns <- setdiff(all_columns, c(front_columns, "Item"))
+  
+  # Reorder columns
+  combined_data <- combined_data[, c(front_columns, other_columns)]
+  
   combined_data <- combined_data[order(as.numeric(combined_data$CADD_phred), decreasing = TRUE), ]
   
   
