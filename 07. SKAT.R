@@ -11,6 +11,7 @@ extract_genotype_filtered <- function(sample_data, gene_list) {
   
   # Extract genotype and convert 'het' -> 1 and 'hom' -> 2
   # Assuming homozygous for the minor allele (two copies of the variant allele) is represented as 2
+  # TODO: REMAIN TO CHANGE -- 目前設定 het 以外都是 2 (minor allele homo)
   genotypes <- ifelse(filtered_data$Otherinfo1 == "het", 1, 2)
   
   # Return a data frame with the new variant identifier and genotypes
