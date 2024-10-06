@@ -82,7 +82,7 @@ cilium_components <- read.csv("../GENE_LIST/cilium_components.txt",
 ## Combine rare non-synonymous variants of samples of each group into a list 
 DS_ECD <- list(D25029_MAF0.01_missense, D25046_MAF0.01_missense)
 nonDS_ECD <- list(D25007_MAF0.01_missense)
-# TODO: Change here
+# change based on group, for example : c("D250029_MAF0.01_missense","D250046_MAF0.01_missense") for DS_ECD
 sample_names <- c("D25007_MAF0.01_missense")
 
 Fisher_cilium_components_DSECD <- combine_variants_in_genes(DS_ECD, cilium_components, sample_names)
