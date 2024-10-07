@@ -39,8 +39,9 @@ group_variants_and_save <- function(data,output_name) {
   
   ## Prepare for conserved regions
   # Replace "." with NA in both phyloP and phastCons columns and convert to numeric
-  data$phyloP470way_mammalian_rankscore <- as.numeric(na_if(data$phyloP470way_mammalian_rankscore, "."))
-  data$phastCons470way_mammalian_rankscore <- as.numeric(na_if(data$phastCons470way_mammalian_rankscore, "."))
+  # some data with NA not ".", so add additional step to replaces any character that is not a digit or a period with NA 
+  data$phyloP470way_mammalian_rankscore <- as.numeric(na_if(gsub("[^0-9.]", NA, data$phyloP470way_mammalian_rankscore), "."))
+  data$phastCons470way_mammalian_rankscore <- as.numeric(na_if(gsub("[^0-9.]", NA, data$phastCons470way_mammalian_rankscore), "."))
   # Calculate thresholds (75th percentile) for phyloP and phastCons scores
   phyloP_threshold <- quantile(data$phyloP470way_mammalian_rankscore, 0.75, na.rm = TRUE)
   phastCons_threshold <- quantile(data$phastCons470way_mammalian_rankscore, 0.75, na.rm = TRUE)
