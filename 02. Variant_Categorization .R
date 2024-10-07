@@ -1,26 +1,51 @@
 library(dplyr)
 library(openxlsx)
 
+# Function to clean illegal characters from the data
+clean_illegal_strings <- function(df) {
+  df_clean <- df
+  
+  # Loop through each column
+  for (col in colnames(df_clean)) {
+    if (is.character(df_clean[[col]])) {
+      # Remove non-printable characters and invalid UTF-8 strings
+      df_clean[[col]] <- iconv(df_clean[[col]], from = "UTF-8", to = "UTF-8", sub = "")
+      df_clean[[col]] <- gsub("[[:cntrl:]]", "", df_clean[[col]])  # Remove control characters
+    }
+  }
+  
+  return(df_clean)
+}
+
+# Function to group variants and produce EXCEL output
 group_variants_and_save <- function(data,output_name) {
+
+  # Clean the data before processing
+  data <- clean_illegal_strings(data)
+  
+  # Handle non-numeric characters for calculation
+  data$CADD_phred <- as.numeric(gsub("[^0-9.]", NA, data$CADD_phred))
+  data$phyloP470way_mammalian_rankscore <- as.numeric(gsub("[^0-9.]", NA, data$phyloP470way_mammalian_rankscore))
+  data$phastCons470way_mammalian_rankscore <- as.numeric(gsub("[^0-9.]", NA, data$phastCons470way_mammalian_rankscore))
   
   # Define a list to hold all groups of variants
   variant_groups <- list()
   
   ## Grouping data into 14 distinct groups
   # 1. CADD score > 30
-  variant_groups$CADD30 <- subset(data, round(as.numeric(CADD_phred), 2) >= 30)
+  variant_groups$CADD30 <- subset(data, !is.na(CADD_phred) & round(as.numeric(CADD_phred), 2) >= 30)
   
   # 2. CADD score > 15
-  variant_groups$CADD15 <- subset(data, round(as.numeric(CADD_phred), 2) >= 15)
+  variant_groups$CADD15 <- subset(data, !is.na(CADD_phred) & round(as.numeric(CADD_phred), 2) >= 15)
   
   # 3. Missense variants with CADD > 15
-  variant_groups$CADD15_missense <- subset(data, round(as.numeric(CADD_phred), 2) >= 15 & ExonicFunc_refgene == "nonsynonymous SNV")
+  variant_groups$CADD15_missense <- subset(data, !is.na(CADD_phred) & round(as.numeric(CADD_phred), 2) >= 15 & ExonicFunc_refgene == "nonsynonymous SNV")
   
   # 4. All missense variants
   variant_groups$missense <- subset(data, ExonicFunc_refgene == "nonsynonymous SNV")
   
   # 5. Synonymous variants with CADD > 15
-  variant_groups$synonymous_CADD15 <- subset(data, ExonicFunc_refgene == "synonymous SNV" & round(as.numeric(CADD_phred), 2) >= 15)
+  variant_groups$synonymous_CADD15 <- subset(data, ExonicFunc_refgene == "synonymous SNV" & !is.na(CADD_phred) & round(as.numeric(CADD_phred), 2) >= 15)
   
   # 6. All synonymous variants
   variant_groups$synonymous <- subset(data, ExonicFunc_refgene == "synonymous SNV")
@@ -37,16 +62,10 @@ group_variants_and_save <- function(data,output_name) {
   # 10. Variants in promoter regions (2kb upstream and downstream of transcriptional start site)
   variant_groups$promoter <- subset(data, Func_refgene == "upstream" | Func_refgene == "downstream")
   
-  ## Prepare for conserved regions
-  # Replace "." with NA in both phyloP and phastCons columns and convert to numeric
-  # some data with NA not ".", so add additional step to replaces any character that is not a digit or a period with NA 
-  data$phyloP470way_mammalian_rankscore <- as.numeric(na_if(gsub("[^0-9.]", NA, data$phyloP470way_mammalian_rankscore), "."))
-  data$phastCons470way_mammalian_rankscore <- as.numeric(na_if(gsub("[^0-9.]", NA, data$phastCons470way_mammalian_rankscore), "."))
+  # 11. Variants in conserved regions
   # Calculate thresholds (75th percentile) for phyloP and phastCons scores
   phyloP_threshold <- quantile(data$phyloP470way_mammalian_rankscore, 0.75, na.rm = TRUE)
   phastCons_threshold <- quantile(data$phastCons470way_mammalian_rankscore, 0.75, na.rm = TRUE)
-  
-  # 11. Variants in conserved regions
   variant_groups$conserved <- subset(data, phyloP470way_mammalian >= phyloP_threshold & phastCons470way_mammalian_rankscore >= phastCons_threshold)
   
   # 12. Variants in non-coding RNAs (ncRNAs)
