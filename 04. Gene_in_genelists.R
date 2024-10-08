@@ -162,6 +162,7 @@ gene_list <- function(input, gene_list, output_name) {
   return(gene_list_variant)
 }
 
-# Example usage : D25029 (DS-ECD)
-D25029_GeneList <- gene_list(D25029_MAF0.01,gene_lists,"D25029_MAF0.01.gene_lists.xlsx")
+D25007_GeneList <- gene_list(D25007_MAF0.01,gene_lists,"../nonDS-ECD/D25007/D25007_MAF0.01.gene_lists.xlsx")
+D25029_GeneList <- gene_list(D25029_MAF0.01,gene_lists,"../DS-ECD/D25029/D25029_MAF0.01.gene_lists.xlsx")
+D25046_GeneList <- gene_list(D25046_MAF0.01,gene_lists,"../DS-ECD/D25046/D25046_MAF0.01.gene_lists.xlsx")
 
