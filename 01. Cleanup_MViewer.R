@@ -30,7 +30,7 @@ MViewer_cleanup <-function(input_filePath){
   combined_data <- combined_data[-1, ]
   
   # Define the columns to move to the front
-  front_columns <- c("Gene_refgene", "ExonicFunc_refgene", "CADD_phred", "REVEL_score", "Severity_Score", "dbSNP", "ClinVar", "Max_Allele_Freq", "Taiwan_Biobank","Nucleotide" ,"AAChange")
+  front_columns <- c("Gene_refgene", "ExonicFunc_refgene", "CADD_phred", "REVEL_score", "Severity_Score", "dbSNP", "ClinVar", "Max_Allele_Freq", "Taiwan_Biobank","Het_Percent", "Nucleotide" ,"AAChange")
   
   # Get all column names
   all_columns <- trimws(colnames(combined_data))
@@ -40,8 +40,11 @@ MViewer_cleanup <-function(input_filePath){
   
   # Reorder columns
   combined_data <- combined_data[, c(front_columns, other_columns)]
-  
   combined_data <- combined_data[order(as.numeric(combined_data$CADD_phred), decreasing = TRUE), ]
+
+  # Variants in multiple overlapping genes were included in each gene separately 
+  combined_data <- combined_data %>%
+    tidyr::separate_rows(Gene_refgene, sep = ";")
   
   
   # Overwrite the original data to cleanup data
