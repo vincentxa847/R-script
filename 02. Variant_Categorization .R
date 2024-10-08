@@ -117,6 +117,7 @@ group_variants_and_save <- function(data,output_name) {
 }
 
 
-D25029_variantgroup <- group_variants_and_save(D25029,"D25029_variantgroup.xlsx")
-D25046_variantgroup <- group_variants_and_save(D25046,"D25046_variantgroup.xlsx")
+D25007_variantgroup <- group_variants_and_save(D25007_MAF0.01,"../nonDS-ECD/D25007/D25007_variantgroup.xlsx")
+D25029_variantgroup <- group_variants_and_save(D25029_MAF0.01,"../DS-ECD/D25029/D25029_variantgroup.xlsx")
+D25046_variantgroup <- group_variants_and_save(D25046_MAF0.01,"../DS-ECD/D25046/D25046_variantgroup.xlsx")
 
