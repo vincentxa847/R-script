@@ -67,11 +67,31 @@ writeout_list <- function(table, gene_list, output_name) {
 out <- writeout_list(D25029,gene_lists$HP0006695_ECD, "D25029_MAF0.01_HP0006695")  
 
 #### Summary list and EXCEL output of variants in different genelist ####
+# Function to clean illegal characters from the data
+clean_illegal_strings <- function(df) {
+  df_clean <- df
+  
+  # Loop through each column
+  for (col in colnames(df_clean)) {
+    if (is.character(df_clean[[col]])) {
+      # Remove non-printable characters and invalid UTF-8 strings
+      df_clean[[col]] <- iconv(df_clean[[col]], from = "UTF-8", to = "UTF-8", sub = "")
+      df_clean[[col]] <- gsub("[[:cntrl:]]", "", df_clean[[col]])  # Remove control characters
+    }
+  }
+  
+  return(df_clean)
+}
+
+# Function to include variants in gene list and produce EXCEL output
 gene_list <- function(input, gene_list, output_name) {
   
   if (!"Gene_refgene" %in% colnames(input)) {
     stop("The input data does not contain a column named 'Gene_refgene'.")
   }
+
+  # Clean the data before processing
+  input <- clean_illegal_strings(input)
   
   # Define a list to hold all gene_list_variant
   gene_list_variant <- list()
