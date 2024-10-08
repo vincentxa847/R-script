@@ -34,6 +34,7 @@ gene_paths <- list(
   hsa04340_hedgedog = "../GENE_LIST/KEGG/hsa04340_hedgedog.txt",
   hsa04020_calcium_signaling = "../GENE_LIST/KEGG/hsa04020_calcium_signaling.txt",
   hsa04350_TGFbata = "../GENE_LIST/KEGG/hsa04350_TGFbata.txt",
+  N01453_BMP = "../GENE_LIST/KEGG/N01453_BMP.txt",
   # HPO
   HP0006695_ECD = "../GENE_LIST/HPOList/genes_for_HP_0006695",
   HP0001627_CHD = "../GENE_LIST/HPOList/genes_for_HP_0001627.txt",
@@ -42,7 +43,7 @@ gene_paths <- list(
 )
 
 # Read in gene list
-gene_lists <- lapply(gene_paths, read_gene_list,output_name)
+gene_lists <- lapply(gene_paths, read_gene_list)
 
 #### Output a list of gene for IPA ####
 # -----------------------------------------------------------------------------
@@ -95,9 +96,11 @@ gene_list <- function(input, gene_list, output_name) {
   gene_list_variant$hsa04020_calcium_signaling <- input %>% filter(Gene_refgene %in% gene_list$hsa04020_calcium_signaling)
   # 10.hsa04350_TGFbata
   gene_list_variant$hsa04350_TGFbata <- input %>% filter(Gene_refgene %in% gene_list$hsa04350_TGFbata)
-  # 11.HP0006695_ECD
+  # 11.N01453_BMP
+  gene_list_variant$N01453_BMP <- input %>% filter(Gene_refgene %in% gene_list$N01453_BMP)
+  # 12.HP0006695_ECD
   gene_list_variant$HP0006695_ECD <- input %>% filter(Gene_refgene %in% gene_list$HP0006695_ECD)
-  # 12.HP0001627_CHD
+  # 13.HP0001627_CHD
   gene_list_variant$HP0001627_CHD <- input %>% filter(Gene_refgene %in% gene_list$HP0001627_CHD)
   
   ## Prepare genesymbol worksheet and Sort each group by CADD_phred
