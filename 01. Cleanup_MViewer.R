@@ -30,7 +30,7 @@ MViewer_cleanup <-function(input_filePath){
   combined_data <- combined_data[-1, ]
   
   # Define the columns to move to the front
-  front_columns <- c("Gene_refgene", "ExonicFunc_refgene", "CADD_phred", "REVEL_score", "Severity_Score", "dbSNP", "ClinVar", "Max_Allele_Freq", "Taiwan_Biobank","Het_Percent", "Nucleotide" ,"AAChange")
+  front_columns <- c("Gene_refgene", "ExonicFunc_refgene", "CADD_phred", "REVEL_score", "Severity_Score", "Polyphen2_HDIV_score", "Polyphen2_HVAR_score", "dbSNP", "ClinVar", "HGMD_Variant_Class", "Max_Allele_Freq", "Taiwan_Biobank", "Het_Percent", "Nucleotide" ,"AAChange")
   
   # Get all column names
   all_columns <- trimws(colnames(combined_data))
