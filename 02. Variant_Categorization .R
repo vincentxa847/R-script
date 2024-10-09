@@ -1,6 +1,9 @@
 library(dplyr)
 library(openxlsx)
 
+# -----------------------------------------------------------------------------
+#### Summary list and EXCEL output of variants of different catalog ####
+# -----------------------------------------------------------------------------
 # Function to clean illegal characters from the data
 clean_illegal_strings <- function(df) {
   df_clean <- df
@@ -15,6 +18,32 @@ clean_illegal_strings <- function(df) {
   }
   
   return(df_clean)
+}
+
+# Function to summarize the data by Gene and Variant Type, which is a integration of 05.Summarize.R
+summarize_by_gene_variant <- function(df) {
+  # Group by 'Gene_refgene' and 'Func_refgene', then summarize counts
+  summary_table <- df %>%
+    group_by(Gene_refgene, Func_refgene) %>%
+    summarize(count = n(), .groups = "drop")
+  
+  # Pivot table to a wider format, fill missing values with 0
+  wide_table <- summary_table %>%
+    tidyr::pivot_wider(names_from = Func_refgene, values_from = count, values_fill = 0)
+  
+  # Ensure the required columns ('exonic', 'UTR3', 'UTR5', 'intronic', 'upstream', 'downstream', 'intergenic') are present
+  required_columns <- c("exonic", "UTR3", "UTR5", "intronic", "upstream", "downstream", "intergenic")
+  # Add missing columns with default value 0
+  for (col in required_columns) {
+    if (!col %in% colnames(wide_table)) {
+      wide_table[[col]] <- 0
+    }
+  }
+  # Reorder columns to ensure the required columns are at the front
+  wide_table <- wide_table %>%
+    dplyr::select(Gene_refgene, all_of(required_columns), everything())
+  
+  return(wide_table)
 }
 
 # Function to group variants and produce EXCEL output
@@ -96,12 +125,25 @@ group_variants_and_save <- function(data,output_name) {
   }
   # Convert the list to a data frame
   gene_refgene_df <- as.data.frame(gene_refgene_list)
-  
+
+  ## Prepare summary worksheet
+  summarized_results <- lapply(variant_groups, summarize_by_gene_variant)
+  names(summarized_results) <- names(variant_groups)
   
   ## EXCEL output
   wb <- createWorkbook() # Create a workbook for the Excel output
-  addWorksheet(wb, "GENESYMBOL OF DIFFERENT GROUPS")
-  writeData(wb, "GENESYMBOL OF DIFFERENT GROUPS", gene_refgene_df)
+  # write genesymbol worksheet
+  addWorksheet(wb, "GENESYMBOL OF GENELIST")
+  writeData(wb, "GENESYMBOL OF GENELIST", gene_refgene_df)
+  # write summary worksheet
+  start_row <- 1
+  addWorksheet(wb, "Summary")
+  for (table in names(summarized_results)) {
+    writeData(wb, "Summary", paste(table), startRow = start_row, startCol = 1) # Write table name
+    start_row <- start_row + 1
+    writeData(wb, "Summary", summarized_results[[table]], startRow = start_row, startCol = 1) # Write data frame
+    start_row <- start_row + nrow(summarized_results[[table]]) + 2 # Move start_row down for the next table
+  }
   
   # Create individual worksheets for each variant group
   for (group_name in names(variant_groups)) {
@@ -116,7 +158,9 @@ group_variants_and_save <- function(data,output_name) {
   return(variant_groups)
 }
 
-
+# -----------------------------------------------------------------------------
+#### Usage ####
+# -----------------------------------------------------------------------------
 D25007_variantgroup <- group_variants_and_save(D25007_MAF0.01,"../nonDS-ECD/D25007/D25007_variantgroup.xlsx")
 D25029_variantgroup <- group_variants_and_save(D25029_MAF0.01,"../DS-ECD/D25029/D25029_variantgroup.xlsx")
 D25046_variantgroup <- group_variants_and_save(D25046_MAF0.01,"../DS-ECD/D25046/D25046_variantgroup.xlsx")
