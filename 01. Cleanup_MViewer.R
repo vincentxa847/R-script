@@ -54,12 +54,14 @@ MViewer_cleanup <-function(input_filePath){
 }
 
 # OUTPUT THE ORIGINAL TABLE FROM MVIEWER (ONLY MAF<0.01) 
-N1675_MAF0.01 = MViewer_cleanup("../N1675/N1675-MAF0.01.tsv")
-AI3008_MAF0.01 = MViewer_cleanup("../AI3008/AI3008-MAF0.01.tsv")
-
+# -----------------------------------------------------------------------------
+#### Usage ####
+# -----------------------------------------------------------------------------
+# DS-nonECD
+D25165_MAF0.01 = MViewer_cleanup("../DS-nonECD/D25165/D25165.0.01.tsv")
+D25168_MAF0.01 = MViewer_cleanup("../DS-nonECD/D25168/D25168.0.01.tsv")
 # nonDS-ECD
 D25007_MAF0.01 = MViewer_cleanup("../nonDS-ECD/D25007/D25007.0.01.tsv")
-
 # DS-ECD
 D25029_MAF0.01 = MViewer_cleanup("../DS-ECD/D25029/D25029.0.01.tsv") 
 D25046_MAF0.01 = MViewer_cleanup("../DS-ECD/D25046/D25046.0.01.tsv")
