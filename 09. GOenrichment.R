@@ -1,5 +1,6 @@
 # -----------------------------------------------------------------------------
 # Using clusterProfiler to perform Over-representation analysis (ORA)
+# By default, clusterProfiler uses the entire genome as background, which will result no enrichment for small gene list such as CADD15
 # Reference : Xu, S., Hu, E., Cai, Y. et al. Using clusterProfiler to characterize multiomics data. Nat Protoc (2024).
 # -----------------------------------------------------------------------------
 library(clusterProfiler)
