@@ -60,7 +60,8 @@ orval_datasets <- list(
   "D25029.ORVAL.exonic.MAF0.01" = D25029_variantgroup$exonic,
   "D25029.ORVAL.intronic.MAF0.01" = D25029_variantgroup$intronic,
   "D25029.ORVAL.UTR.MAF0.01" = D25029_variantgroup$UTR,
-  "D25029.ORVAL.promoter.MAF0.01" = D25029_variantgroup$promoter
+  "D25029.ORVAL.promoter.MAF0.01" = D25029_variantgroup$promoter,
+  "D25029.ORVAL.chr21.MAF0.01" = D25029_variantgroup$chr21
 )
 
 # Write specified dataset to an Excel workbook
