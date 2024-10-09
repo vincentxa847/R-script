@@ -30,7 +30,7 @@ ORVAL_variantList <- function(orval_datasets, output_file) {
     # Extract relevant columns, filter, and modify Genotype values
     # ORVAL requires five columns: Chr, Start, Ref, Alt, and Zygosity (Genotype).
     data_modified <- data %>%
-      select(Chr, Start, Ref, Alt, Genotype) %>%          # Select required columns
+      select(Gene_refgene, Func_refgene, Chr, Start, Ref, Alt, Genotype) %>%          # Select required columns
       filter(Ref != 0 & Alt != 0) %>%                     # Filter out rows with invalid values
       mutate(Genotype = case_when(
         Genotype == "het" ~ "Heterozygous",               # Convert 'het' to 'Heterozygous'
