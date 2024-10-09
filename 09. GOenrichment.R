@@ -47,7 +47,12 @@ ORA.Enrichment <- function(geneset, analysisType = "KEGG", ont = "BP", pvalueCut
   })
   
   # Create cnetplot and save as object
-  network_plot <- cnetplot(enrichment_result, showCategory = showCategoryNetwork)
+  network_plot <- cnetplot(
+    enrichment_result, 
+    showCategory = showCategoryNetwork,
+    cex_label_category = 0.7,  # Font size for category labels (pathways or GO terms)
+    cex_label_gene = 0.5       # Font size for gene labels
+  )
   
   # Return a list with enrichment results and all plots
   return(list(
