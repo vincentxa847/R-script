@@ -1,75 +1,80 @@
-library("reshape2")
-library("biomaRt")
-library("topGO")
+# -----------------------------------------------------------------------------
+# Using clusterProfiler to perform Over-representation analysis (ORA)
+# Reference : Xu, S., Hu, E., Cai, Y. et al. Using clusterProfiler to characterize multiomics data. Nat Protoc (2024).
+# -----------------------------------------------------------------------------
+library(clusterProfiler)
+library(org.Hs.eg.db)
+library(enrichplot)
 
-#### Fetch geneId2GO and Gene Universe of human gene ####
-### geneId2GO
-# Connect to the Ensembl database
-ensembl <- useMart("ensembl")
-# Set the dataset to human genes
-ensembl_human <- useDataset("hsapiens_gene_ensembl", mart = ensembl)
-
-go_mapping <- getBM(attributes = c("ensembl_gene_id", "go_id"),
-                    filters = "biotype",
-                    values = "protein_coding",  # You can change this to other gene types if needed
-                    mart = ensembl_human)
-
-# View the first few rows of the GO mapping
-head(go_mapping)
-
-# Take some time to fetch, so store as rds
-saveRDS(go_mapping, file = "go_mapping.rds")
-
-### Gene Universe (all protein-coding genes) [TODO:須確定是否該用 all protein-coding genes, 目前找不到 GO 導致 ERROR: 收捲時發生錯誤: 第一引數必須是向量]
-# Generate the gene universe as a unique list of Ensembl gene IDs
-gene_universe <- unique(go_mapping$ensembl_gene_id)
-# View the number of genes in the universe
-length(gene_universe) # 23231
-
-
-#### GOenrichment Analysis ####
-GOenrichment = function(genesOfInterest) {
-
-  # Create the geneList factor (1 = genes of interest, 0 = background genes)
-  geneList <- factor(as.integer(gene_universe %in% gene_mapping$ensembl_gene_id))
-  names(geneList) <- gene_universe
+#### Function to perform ORA of KEGG or GO and visualize the result ####
+ORA.Enrichment <- function(geneset, analysisType = "KEGG", ont = "BP", pvalueCutoff = 0.05, showCategory = 10, showCategoryNetwork = 5) {
+  # Sample gene list
+  gene_list <- geneset
   
-  head(geneList)
+  # Convert gene symbols to Entrez IDs
+  gene_entrez <- bitr(gene_list, fromType = "SYMBOL", toType = "ENTREZID", OrgDb = org.Hs.eg.db)
+  entrez_ids <- gene_entrez$ENTREZID
   
-  ## Create the topGO object for Biological Process (BP) ontology
-  BPenrichment <- new("topGOdata", 
-                      description="Biological Process Enrichment Analysis", 
-                      ontology="BP", 
-                      allGenes=geneList, 
-                      annot=annFUN.gene2GO, 
-                      gene2GO=go_mapping, 
-                      nodeSize=10)  # nodeSize set to filter out small GO terms
+  # Perform KEGG or GO enrichment analysis
+  if (analysisType == "KEGG") {
+    # KEGG Enrichment Analysis
+    enrichment_result <- enrichKEGG(gene = entrez_ids, organism = 'hsa', pvalueCutoff = pvalueCutoff)
+  } else if (analysisType == "GO") {
+    # GO Enrichment Analysis (for BP, MF, or CC)
+    enrichment_result <- enrichGO(gene = entrez_ids,
+                                  OrgDb = org.Hs.eg.db,
+                                  ont = ont, # "BP" for Biological Process, "MF" for Molecular Function, "CC" for Cellular Component
+                                  pvalueCutoff = pvalueCutoff)
+  } else {
+    stop("Invalid analysis type. Choose either 'KEGG' or 'GO'.")
+  }
   
-  ## Perform Fisher's test for enrichment
-  BPFisherResults <- runTest(BPenrichment, statistic="fisher")
+  # Create barplot and save as object
+  bar_plot <- barplot(enrichment_result, showCategory = showCategory)
   
-  ## Retrieve and filter enriched GO terms (only those with p-value <= 0.05)
-  BPenriched <- GenTable(BPenrichment, 
-                         Fisher=BPFisherResults, 
-                         orderBy="Fisher", 
-                         topNodes=20)  # Adjust topNodes if needed
-  BPsignificant <- BPenriched[as.numeric(BPenriched$Fisher) <= 0.05, ]
+  # Create dotplot and save as object
+  dot_plot <- dotplot(enrichment_result, showCategory = showCategory)
   
-  ## Return the table of significant GO terms
-  return(BPsignificant)
+  # Network plot: Convert Entrez IDs back to gene symbols
+  gene_symbol_df <- bitr(entrez_ids, fromType = "ENTREZID", toType = "SYMBOL", OrgDb = org.Hs.eg.db)
+  
+  # Replace Entrez IDs with Gene Symbols in enrichment results
+  enrichment_result@result$geneID <- sapply(enrichment_result@result$geneID, function(x) {
+    ids <- unlist(strsplit(x, "/"))
+    symbols <- gene_symbol_df$SYMBOL[match(ids, gene_symbol_df$ENTREZID)]
+    paste(symbols, collapse = "/")
+  })
+  
+  # Create cnetplot and save as object
+  network_plot <- cnetplot(enrichment_result, showCategory = showCategoryNetwork)
+  
+  # Return a list with enrichment results and all plots
+  return(list(
+    enrichment = enrichment_result,
+    barplot = bar_plot,
+    dotplot = dot_plot,
+    cnetplot = network_plot
+  ))
 }
 
+# Example usage for KEGG enrichment
+tmp_kegg <- ORA.Enrichment(D25046_variantgroup$intronic$Gene_refgene, analysisType = "KEGG", pvalueCutoff = 0.05, showCategory = 10, showCategoryNetwork = 5)
 
+# Example usage for GO enrichment (Biological Process)
+tmp_go <- ORA.Enrichment(D25046_variantgroup$intronic$Gene_refgene, analysisType = "GO", ont = "BP", pvalueCutoff = 0.05, showCategory = 10, showCategoryNetwork = 2)
 
-#### Perform Analysis ####
-genes_of_interest <- D25007_MAF0.01_CADD15$Gene_refgene
+# Access the barplot using $ operator
+tmp_kegg$barplot
+tmp_go$barplot
 
-# Query Ensembl for Ensembl IDs based on genes_of_interest
-gene_mapping <- getBM(attributes = c("external_gene_name", "ensembl_gene_id"),
-                      filters = "external_gene_name",
-                      values = genes_of_interest,
-                      mart = ensembl_human)
+# Access the dotplot using $ operator
+tmp_kegg$dotplot
+tmp_go$dotplot
 
-# View the result
-print(gene_mapping$ensembl_gene_id)
-GO_ <- GOenrichment(gene_mapping$ensembl_gene_id)
+# Access the cnetplot using $ operator
+tmp_kegg$cnetplot
+tmp_go$cnetplot
+
+# View the enrichment results
+head(tmp_kegg$enrichment)
+head(tmp_go$enrichment)
