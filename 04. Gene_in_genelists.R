@@ -216,3 +216,6 @@ D25007_GeneList <- gene_list(D25007_MAF0.01,gene_lists,"../nonDS-ECD/D25007/D250
 D25029_GeneList <- gene_list(D25029_MAF0.01,gene_lists,"../DS-ECD/D25029/D25029_MAF0.01.gene_lists.xlsx")
 D25046_GeneList <- gene_list(D25046_MAF0.01,gene_lists,"../DS-ECD/D25046/D25046_MAF0.01.gene_lists.xlsx")
 
+D25165_GeneList <- gene_list(D25165_MAF0.01,gene_lists,"../DS-nonECD/D25165/D25165_MAF0.01.gene_lists.xlsx")
+D25168_GeneList <- gene_list(D25168_MAF0.01,gene_lists,"../DS-nonECD/D25168/D25168_MAF0.01.gene_lists.xlsx")
+
