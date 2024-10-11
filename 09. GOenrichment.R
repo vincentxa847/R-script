@@ -6,7 +6,12 @@
 # -----------------------------------------------------------------------------
 library(clusterProfiler)
 library(org.Hs.eg.db)
+library(reactome.db)
 library(enrichplot)
+library(biomaRt)
+
+# Connect to the UniProt Database
+mart <- useMart("uniprot")
 
 #### Function to perform ORA of KEGG or GO and visualize the result ####
 ORA.Enrichment <- function(geneset, analysisType = "KEGG", ont = "BP", pvalueCutoff = 0.05, showCategory = 10, showCategoryNetwork = 5) {
@@ -17,18 +22,35 @@ ORA.Enrichment <- function(geneset, analysisType = "KEGG", ont = "BP", pvalueCut
   gene_entrez <- bitr(gene_list, fromType = "SYMBOL", toType = "ENTREZID", OrgDb = org.Hs.eg.db)
   entrez_ids <- gene_entrez$ENTREZID
   
-  # Perform KEGG or GO enrichment analysis
+  # Perform enrichment analysis
   if (analysisType == "KEGG") {
     # KEGG Enrichment Analysis
-    enrichment_result <- enrichKEGG(gene = entrez_ids, organism = 'hsa', pvalueCutoff = pvalueCutoff)
+    enrichment_result <- enrichKEGG(gene = entrez_ids, 
+                                    organism = 'hsa', 
+                                    pvalueCutoff = pvalueCutoff)
   } else if (analysisType == "GO") {
     # GO Enrichment Analysis (for BP, MF, or CC)
     enrichment_result <- enrichGO(gene = entrez_ids,
                                   OrgDb = org.Hs.eg.db,
                                   ont = ont, # "BP" for Biological Process, "MF" for Molecular Function, "CC" for Cellular Component
                                   pvalueCutoff = pvalueCutoff)
+  } else if (analysisType == "REACTOME") {
+    # Reactome Enrichment Analysis
+    enrichment_result <- enrichPathway(gene = entrez_ids, 
+                                     organism = "human", 
+                                     pvalueCutoff = pvalueCutoff)
+  } else if (analysisType == "UniProt") {
+    # Get UniProt annotations 
+    # TODO: REMAIN TO GENERATE THE VISUALIZATION
+    enrichment_result <- getBM(attributes = c('uniprot_swissprot_accession', 
+                                              'gene_name', 
+                                              'go_id', 
+                                              'pathway_id'), 
+                               filters = 'gene_name', 
+                               values = gene_list, 
+                               mart = mart)
   } else {
-    stop("Invalid analysis type. Choose either 'KEGG' or 'GO'.")
+    stop("Invalid analysis type. Choose either 'KEGG' or 'GO'or 'REACTOME' or 'UniProt'")
   }
   
   # Create barplot and save as object
