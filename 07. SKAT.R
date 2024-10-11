@@ -92,6 +92,7 @@ run_SKAT <- function(geneList, group1, group2, SKAT_or_SKATO){
   
   # method="optimal.adj" represent SKAT-O, default= "davies"
   # weights.beta use default value c(1,25)
+  set.seed(123)
   skat_result <- SKAT(skat_data$genotype_matrix, null_model, kernel="linear.weighted", method=kernel2use, weights.beta=c(1,25))
 }
 
