@@ -61,46 +61,49 @@ group_variants_and_save <- function(data,output_name) {
   variant_groups <- list()
   
   ## Grouping data into 14 distinct groups
-  # 1. CADD score > 30
+  # 1. Loss of Function (STOP GAIN or SPLICING or FRAMESGIFT)
+  variant_groups$LOF <- subset(data, Consequence == "stop_gained" | Consequence =="splice_acceptor_variant" | Consequence =="splice_donor_variant" | Consequence == "frameshift_variant")
+  
+  # 2. CADD score > 30
   variant_groups$CADD30 <- subset(data, !is.na(CADD_phred) & round(as.numeric(CADD_phred), 2) >= 30)
   
-  # 2. CADD score > 15
+  # 3. CADD score > 15
   variant_groups$CADD15 <- subset(data, !is.na(CADD_phred) & round(as.numeric(CADD_phred), 2) >= 15)
   
-  # 3. Missense variants with CADD > 15
+  # 4. Missense variants with CADD > 15
   variant_groups$CADD15_missense <- subset(data, !is.na(CADD_phred) & round(as.numeric(CADD_phred), 2) >= 15 & ExonicFunc_refgene == "nonsynonymous SNV")
   
-  # 4. All missense variants
+  # 5. All missense variants
   variant_groups$missense <- subset(data, ExonicFunc_refgene == "nonsynonymous SNV")
   
-  # 5. Synonymous variants with CADD > 15
+  # 6. Synonymous variants with CADD > 15
   variant_groups$synonymous_CADD15 <- subset(data, ExonicFunc_refgene == "synonymous SNV" & !is.na(CADD_phred) & round(as.numeric(CADD_phred), 2) >= 15)
   
-  # 6. All synonymous variants
+  # 7. All synonymous variants
   variant_groups$synonymous <- subset(data, ExonicFunc_refgene == "synonymous SNV")
   
-  # 7. All exonic variants
+  # 8. All exonic variants
   variant_groups$exonic <- subset(data, Func_refgene == "exonic")
   
-  # 8. All variants in UTR regions
+  # 9. All variants in UTR regions
   variant_groups$UTR <- subset(data, Func_refgene == "UTR3" | Func_refgene == "UTR5")
   
-  # 9. All intronic variants
+  # 10. All intronic variants
   variant_groups$intronic <- subset(data, Func_refgene == "intronic")
   
-  # 10. Variants in promoter regions (2kb upstream and downstream of transcriptional start site)
+  # 11. Variants in promoter regions (2kb upstream and downstream of transcriptional start site)
   variant_groups$promoter <- subset(data, Func_refgene == "upstream" | Func_refgene == "downstream")
   
-  # 11. Variants in conserved regions
+  # 12. Variants in conserved regions
   # Calculate thresholds (75th percentile) for phyloP and phastCons scores
   phyloP_threshold <- quantile(data$phyloP470way_mammalian_rankscore, 0.75, na.rm = TRUE)
   phastCons_threshold <- quantile(data$phastCons470way_mammalian_rankscore, 0.75, na.rm = TRUE)
   variant_groups$conserved <- subset(data, phyloP470way_mammalian >= phyloP_threshold & phastCons470way_mammalian_rankscore >= phastCons_threshold)
   
-  # 12. Variants in non-coding RNAs (ncRNAs)
+  # 13. Variants in non-coding RNAs (ncRNAs)
   variant_groups$ncRNA <- data[grep("ncRNA", data$Func_refgene),]
   
-  # 13. variants in double-elite enhancers (skip now)
+  # 14. variants in double-elite enhancers (skip now)
   # pass
   
   # 14. loss of function (unsure the criteria, skip now)
