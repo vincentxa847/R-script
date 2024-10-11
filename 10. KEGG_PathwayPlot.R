@@ -11,19 +11,33 @@ kegg_genesWithVariant_CADD <- function(sample, table_name, pathway_id, output_di
   # Handle CADD value
   gene_cadd_df$CADD_phred[gene_cadd_df$CADD_phred == "."] <- 0
   gene_cadd_df$CADD_phred <- as.numeric(gene_cadd_df$CADD_phred)
+
+  # Check if all CADD_phred values are zero (no CADD score), which will cause pathview fail
+  if (all(gene_cadd_df$CADD_phred == 0)) {
+    message("All CADD_phred values are zero. Assigning 0.001 to the first gene for visualization.")
+    gene_cadd_df$CADD_phred[1] <- 0.001  # Assign 0.001 to the first row
   
   # Remove duplicates based on Gene_refgene and CADD_phred
   unique_gene_cadd_df <- unique(gene_cadd_df)
   
   # Convert gene symbols to Entrez IDs
-  entrez_genes <- clusterProfiler::bitr(unique_gene_cadd_df$Gene_refgene, fromType = "SYMBOL", toType = "ENTREZID", OrgDb = org.Hs.eg.db)
+  entrez_genes <- clusterProfiler::bitr(unique_gene_cadd_df$Gene_refgene, 
+                                        fromType = "SYMBOL", 
+                                        toType = "ENTREZID", 
+                                        OrgDb = org.Hs.eg.db)
   
   # Merge Entrez IDs with CADD_phred values
   entrez_genes <- merge(entrez_genes, unique_gene_cadd_df, by.x = "SYMBOL", by.y = "Gene_refgene")
+
+  # Filter rows where CADD_phred is not zero
+  non_zero_cadd_genes <- entrez_genes[entrez_genes$CADD_phred != 0, ]
+  
+  # Print the SYMBOL, ENTREZID, and CADD_phred values
+  message("Genes with non-zero CADD_phred values:")
+  print(non_zero_cadd_genes[, c("SYMBOL", "ENTREZID", "CADD_phred")])
   
   # Create a named vector with Entrez IDs as names and CADD_phred as values
   gene_data <- setNames(entrez_genes$CADD_phred, entrez_genes$ENTREZID)
-  
 
   # Store the current working directory
   original_wd <- getwd()
@@ -44,4 +58,30 @@ kegg_genesWithVariant_CADD <- function(sample, table_name, pathway_id, output_di
 # -----------------------------------------------------------------------------
 #### Usage ####
 # -----------------------------------------------------------------------------
+## DS-nonECD
+# D25165
 kegg_genesWithVariant_CADD(D25165_GeneList, "hsa04310_Wnt", "hsa04310", "../DS-nonECD/D25165/")
+kegg_genesWithVariant_CADD(D25165_GeneList, "hsa04330_Notch", "hsa04330", "../DS-nonECD/D25165/")
+kegg_genesWithVariant_CADD(D25165_GeneList, "hsa04340_hedgedog", "hsa04340", "../DS-nonECD/D25165/")
+kegg_genesWithVariant_CADD(D25165_GeneList, "hsa04020_calcium_signaling", "hsa04020", "../DS-nonECD/D25165/")
+kegg_genesWithVariant_CADD(D25165_GeneList, "hsa04350_TGFbeta", "hsa04350", "../DS-nonECD/D25165/")
+#kegg_genesWithVariant_CADD(D25165_GeneList, "N01453_BMP", "N01453", "../DS-nonECD/D25165/")
+# D25168
+kegg_genesWithVariant_CADD(D25168_GeneList, "hsa04310_Wnt", "hsa04310", "../DS-nonECD/D25168/")
+kegg_genesWithVariant_CADD(D25168_GeneList, "hsa04330_Notch", "hsa04330", "../DS-nonECD/D25168/")
+kegg_genesWithVariant_CADD(D25168_GeneList, "hsa04340_hedgedog", "hsa04340", "../DS-nonECD/D25168/")
+kegg_genesWithVariant_CADD(D25168_GeneList, "hsa04020_calcium_signaling", "hsa04020", "../DS-nonECD/D25168/")
+kegg_genesWithVariant_CADD(D25168_GeneList, "hsa04350_TGFbeta", "hsa04350", "../DS-nonECD/D25168/")
+## DS-ECD
+# D25029 
+kegg_genesWithVariant_CADD(D25029_GeneList, "hsa04310_Wnt", "hsa04310", "../DS-ECD/D25029/")
+kegg_genesWithVariant_CADD(D25029_GeneList, "hsa04330_Notch", "hsa04330", "../DS-ECD/D25029/")
+kegg_genesWithVariant_CADD(D25029_GeneList, "hsa04340_hedgedog", "hsa04340", "../DS-ECD/D25029/")
+kegg_genesWithVariant_CADD(D25029_GeneList, "hsa04020_calcium_signaling", "hsa04020", "../DS-ECD/D25029/")
+kegg_genesWithVariant_CADD(D25029_GeneList, "hsa04350_TGFbeta", "hsa04350", "../DS-ECD/D25029/")
+# D25046 
+kegg_genesWithVariant_CADD(D25046_GeneList, "hsa04310_Wnt", "hsa04310", "../DS-ECD/D25046/")
+kegg_genesWithVariant_CADD(D25046_GeneList, "hsa04330_Notch", "hsa04330", "../DS-ECD/D25046/")
+kegg_genesWithVariant_CADD(D25046_GeneList, "hsa04340_hedgedog", "hsa04340", "../DS-ECD/D25046/") 
+kegg_genesWithVariant_CADD(D25046_GeneList, "hsa04020_calcium_signaling", "hsa04020", "../DS-ECD/D25046/")
+kegg_genesWithVariant_CADD(D25046_GeneList, "hsa04350_TGFbeta", "hsa04350", "../DS-ECD/D25046/") ## fix.by(by.y, y)： 'by' 必須指定唯一有效的行
