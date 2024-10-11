@@ -16,7 +16,7 @@ kegg_genesWithVariant_CADD <- function(sample, table_name, pathway_id, output_di
   unique_gene_cadd_df <- unique(gene_cadd_df)
   
   # Convert gene symbols to Entrez IDs
-  entrez_genes <- bitr(unique_gene_cadd_df$Gene_refgene, fromType = "SYMBOL", toType = "ENTREZID", OrgDb = org.Hs.eg.db)
+  entrez_genes <- clusterProfiler::bitr(unique_gene_cadd_df$Gene_refgene, fromType = "SYMBOL", toType = "ENTREZID", OrgDb = org.Hs.eg.db)
   
   # Merge Entrez IDs with CADD_phred values
   entrez_genes <- merge(entrez_genes, unique_gene_cadd_df, by.x = "SYMBOL", by.y = "Gene_refgene")
@@ -30,11 +30,11 @@ kegg_genesWithVariant_CADD <- function(sample, table_name, pathway_id, output_di
   
   # Change the working directory to the specified output directory
   output_dir <- paste0(output_dir, pathway_id, ".pathview")
-  dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)  # Create directory if it doesn't exist
+  #dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)  # Create directory if it doesn't exist
   setwd(output_dir)  # Set the new working directory
   
   # Visualize the pathway, using CADD_phred scores for highlighting the genes
-  pathview(gene.data = gene_data, pathway.id = pathway_id, species = "hsa", gene.idtype = "ENTREZID", 
+  pathview::pathview(gene.data = gene_data, pathway.id = pathway_id, species = "hsa", gene.idtype = "ENTREZID", 
            limit = list(gene = c(min(gene_data, na.rm = TRUE), max(gene_data, na.rm = TRUE))))
   
   # Revert back to the original working directory
