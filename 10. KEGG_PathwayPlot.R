@@ -30,7 +30,7 @@ kegg_genesWithVariant_CADD <- function(sample, table_name, pathway_id, output_di
   
   # Change the working directory to the specified output directory
   output_dir <- paste0(output_dir, pathway_id, ".pathview")
-  #dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)  # Create directory if it doesn't exist
+  dir.create(output_dir, recursive = FALSE, showWarnings = FALSE)  # Create directory if it doesn't exist
   setwd(output_dir)  # Set the new working directory
   
   # Visualize the pathway, using CADD_phred scores for highlighting the genes
