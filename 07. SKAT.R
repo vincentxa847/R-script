@@ -98,10 +98,17 @@ run_SKAT <- function(geneList, group1, group2, SKAT_or_SKATO){
 # -----------------------------------------------------------------------------
 #### Usage ####
 # -----------------------------------------------------------------------------
-# Example Usage : Mutation burden of exonic and UTR variants in cilium components across DS-ECD and DS-nonECD samples
+# Example Usage : Mutation burden of exonic and UTR variants in different geneList across DS-ECD and DS-nonECD samples
 # Gene List to analysis from 04. Gene_in_genelists.R
 # Prepare data
-DS_ECD <- list(D25029_variantgroup$exonic,D25046_variantgroup$exonic)
-DS_nonECD <- list(D25165_variantgroup$exonic,D25168_variantgroup$exonic)
+DS_ECD <- list(
+  rbind(D25029_variantgroup$exonic, D25029_variantgroup$UTR),
+  rbind(D25046_variantgroup$exonic, D25046_variantgroup$UTR)
+)
+
+DS_nonECD <- list(
+  rbind(D25165_variantgroup$exonic, D25165_variantgroup$UTR),
+  rbind(D25168_variantgroup$exonic, D25168_variantgroup$UTR)
+)
 
 SKATtest <- run_SKAT(gene_lists$cilium, DS_ECD, DS_nonECD, "SKAT-O")
