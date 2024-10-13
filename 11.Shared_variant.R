@@ -31,11 +31,11 @@ overlap_variant <- function(table1, table2) {
   return(variant_groups)
 }
 
+# -------------------------------------------------------------------
 # Example usage
-tmp_overlap_variant <- overlap_variant(D25165_MAF0.01, D25168_MAF0.01)
+# REMAIN TO UPDATE: EXCEL OUTPUT and GROUP-LEVEL COMPARSION
+# -------------------------------------------------------------------
+tmp_overlap_variant <- overlap_variant(D25029_MAF0.01, D25046_MAF0.01)
 
 # Extract the exonic group and select relevant columns
-tmp_overlap_variant <- tmp_overlap_variant$exonic[, 1:13]
-
-# View result
-tmp_overlap_variant
+tmp_overlap_variant$UTR[1:10,1:13]
