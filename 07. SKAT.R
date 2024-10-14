@@ -20,6 +20,23 @@ extract_genotype_filtered <- function(sample_data, gene_list) {
   return(data.frame(Variant = filtered_data$Variant, Genotype = genotypes))
 }
 
+## Function to extract genotype for a specific gene from variant table 
+extract_genotype_by_gene <- function(sample_data, gene) {
+  
+  # Filter the sample data to only include rows where Gene_refgene matches the specific gene
+  filtered_data <- sample_data[sample_data$Gene_refgene == gene, ]
+  
+  # Create a variant identifier by combining "Chr" and "Start"
+  filtered_data$Variant <- paste(filtered_data$Chr, filtered_data$Start, sep = "_")
+  
+  # Extract genotype and convert 'het' -> 1 and 'hom' -> 2
+  # Assuming homozygous for the minor allele (two copies of the variant allele) is represented as 2
+  genotypes <- ifelse(filtered_data$Otherinfo1 == "het", 1, 2)
+  
+  # Return a data frame with the new variant identifier and genotypes
+  return(data.frame(Variant = filtered_data$Variant, Genotype = genotypes))
+}
+
 ## Function to create genotype matrix and phenotype vector for SKAT
 generate_SKAT_data <- function(case_list, control_list, gene_list) {
     
@@ -62,6 +79,92 @@ generate_SKAT_data <- function(case_list, control_list, gene_list) {
   
   # Return the genotype matrix and phenotype vector
   return(list(genotype_matrix = genotype_matrix, phenotype_vector = phenotype_vector))
+}
+
+## Function to create genotype matrix and phenotype vector for SKAT by gene
+generate_SKAT_data_by_gene <- function(case_list, control_list, gene) {
+  
+  # Initialize lists to store genotype data and all observed variants
+  genotype_list <- list()
+  all_variants <- c()  # Collect all unique variants
+  sample_names <- c()  # Collect all sample names
+  
+  # Process case data
+  for (i in seq_along(case_list)) {
+    sample_genotype <- extract_genotype_by_gene(case_list[[i]], gene)
+    genotype_list[[paste0("Case_", i)]] <- sample_genotype
+    all_variants <- union(all_variants, sample_genotype$Variant)  
+    sample_names <- c(sample_names, paste0("Case_", i))
+  }
+  
+  # Process control data
+  for (i in seq_along(control_list)) {
+    sample_genotype <- extract_genotype_by_gene(control_list[[i]], gene)
+    genotype_list[[paste0("Control_", i)]] <- sample_genotype
+    all_variants <- union(all_variants, sample_genotype$Variant)  
+    sample_names <- c(sample_names, paste0("Control_", i))
+  }
+  
+  # If no variants are found for the gene, return NULL
+  if (length(all_variants) == 0) {
+    return(NULL)
+  }
+  
+  # Create an empty genotype matrix with all variants as columns and samples as rows
+  # Default value is 0, which means homozygous for the major allele (no variant)
+  genotype_matrix <- matrix(0, nrow = length(genotype_list), ncol = length(all_variants))
+  colnames(genotype_matrix) <- all_variants
+  rownames(genotype_matrix) <- sample_names
+  
+  # Fill in the genotype matrix with data
+  for (i in seq_along(genotype_list)) {
+    sample_genotype <- genotype_list[[i]]
+    variant_indices <- match(sample_genotype$Variant, all_variants)  # Find column indices for this sample's variants
+    genotype_matrix[i, variant_indices] <- sample_genotype$Genotype  # Fill in the genotypes
+  }
+  
+  # Create phenotype vector (1 for cases, 0 for controls)
+  phenotype_vector <- c(rep(1, length(case_list)), rep(0, length(control_list)))
+  
+  # Return the genotype matrix and phenotype vector
+  return(list(genotype_matrix = genotype_matrix, phenotype_vector = phenotype_vector))
+}
+
+## Function to run SKAT by gene
+run_SKAT_by_gene <- function(sample_data_case, sample_data_control, gene_list, SKAT_or_SKATO) {
+  
+  results <- list()
+  
+  for (gene in gene_list) {
+    
+    # Generate genotype matrix and phenotype vector for the gene
+    skat_data <- generate_SKAT_data_by_gene(sample_data_case, sample_data_control, gene)
+    
+    # Skip if no data was found for the gene
+    if (is.null(skat_data)) {
+      next
+    }
+    
+    # Choose method: SKAT or SKAT-O
+    if (SKAT_or_SKATO == "SKAT") {
+      kernel2use <- "davies"  # SKAT method
+    } else if (SKAT_or_SKATO == "SKAT-O") {
+      kernel2use <- "optimal.adj"  # SKAT-O method
+    }
+    
+    # Create null model
+    null_model <- SKAT_Null_Model(skat_data$phenotype_vector ~ 1, out_type = "D", Adjustment = TRUE)
+    
+    # Run SKAT
+    print(paste("Running SKAT for gene:", gene))
+    set.seed(123)
+    skat_result <- SKAT(skat_data$genotype_matrix, null_model, kernel = "linear.weighted", method = kernel2use, weights.beta = c(1, 25))
+    
+    # Store results for the gene
+    results[[gene]] <- skat_result
+  }
+  
+  return(results)
 }
 
 ## Function to run SKAT
@@ -114,3 +217,8 @@ DS_nonECD <- list(
 )
 
 SKATtest <- run_SKAT(gene_lists$cilium, DS_ECD, DS_nonECD, "SKAT-O")
+
+## RUN SKAT BY GENE
+# Run SKAT for each gene
+skat_results <- run_SKAT_by_gene(DS_ECD, DS_nonECD, gene_lists$top_candidate_related_genes, "SKAT-O")
+
