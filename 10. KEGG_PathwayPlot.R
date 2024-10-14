@@ -58,6 +58,14 @@ kegg_genesWithVariant_CADD <- function(sample, table_name, pathway_id, output_di
 # -----------------------------------------------------------------------------
 #### Usage ####
 # -----------------------------------------------------------------------------
+## nonDS-ECD
+# D25007
+kegg_genesWithVariant_CADD(D25007_GeneList, "hsa04310_Wnt", "hsa04310", "../nonDS-ECD/D25007/")
+kegg_genesWithVariant_CADD(D25007_GeneList, "hsa04330_Notch", "hsa04330", "../nonDS-ECD/D25007/")
+kegg_genesWithVariant_CADD(D25007_GeneList, "hsa04340_hedgedog", "hsa04340", "../nonDS-ECD/D25007/")
+kegg_genesWithVariant_CADD(D25007_GeneList, "hsa04020_calcium_signaling", "hsa04020", "../nonDS-ECD/D25007/")
+kegg_genesWithVariant_CADD(D25007_GeneList, "hsa04350_TGFbeta", "hsa04350", "../nonDS-ECD/D25007/")
+#kegg_genesWithVariant_CADD(D25007_GeneList, "N01453_BMP", "N01453", "../nonDS-ECD/D25007/")
 ## DS-nonECD
 # D25165
 kegg_genesWithVariant_CADD(D25165_GeneList, "hsa04310_Wnt", "hsa04310", "../DS-nonECD/D25165/")
