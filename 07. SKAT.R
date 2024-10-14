@@ -123,6 +123,7 @@ run_SKAT <- function(geneList, group1, group2, SKAT_or_SKATO, by_gene = FALSE){
     
     # method="optimal.adj" represent SKAT-O, default= "davies"
     # weights.beta use default value c(1,25)
+    # If only one variant in the specified region or gene (Rank of the genotype matrix is one!) SKAT-O cannot be applied and it will automatically apply SKAT
     print("Start to run SKAT")
     set.seed(123)
     skat_results <- SKAT(skat_data$genotype_matrix, null_model,kernel="linear.weighted", method=kernel2use, weights.beta=c(1,25))
