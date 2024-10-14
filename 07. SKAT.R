@@ -88,7 +88,8 @@ run_SKAT <- function(geneList, group1, group2, SKAT_or_SKATO){
   # Creating the Null Model, which represents the baseline against which the alternative hypothesis
   # Not using covariate here (~ 1), which come from PLINK PCA and Sex
   # case-control status (out_type = "D"),  "C" for the continuous outcome and "D" for the dichotomous outcome
-  null_model <- SKAT_Null_Model(skat_data$phenotype_vector ~ 1, out_type = "D")
+  # SKAT_Null_Model will apply small sample size adjustment automatically when n<2000
+  null_model <- SKAT_Null_Model(skat_data$phenotype_vector ~ 1, out_type = "D", Adjustment=TRUE)
   
   # method="optimal.adj" represent SKAT-O, default= "davies"
   # weights.beta use default value c(1,25)
