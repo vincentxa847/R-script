@@ -1,14 +1,20 @@
 library(dplyr) 
+library(openxlsx)
 
 # -------------------------------------------------------------------
 # Function to identify overlapping variants between two samples
 # Also groups the variants by functional regions
 # -------------------------------------------------------------------
 
-overlap_variant <- function(table1, table2) {
+overlap_variant <- function(tables, output_name) {
+  # Ensure that tables is a list of data frames
+  if (!is.list(tables) || length(tables) < 2) {
+    stop("Input should be a list with at least two tables.")
+  }
+  
   # Columns to match: "Chr", "Start", "End", "Ref", "Alt"
-  # Perform a merge to find the common rows
-  shared_rows <- merge(table1, table2, by = c("Chr", "Start", "End", "Ref", "Alt"))
+  # Perform a merge to find the common rows across all tables
+  shared_rows <- Reduce(function(x, y) merge(x, y, by = c("Chr", "Start", "End", "Ref", "Alt")), tables)
   
   # Define a list to hold all groups of variants
   variant_groups <- list()
@@ -28,6 +34,15 @@ overlap_variant <- function(table1, table2) {
   # promoter regions (upstream or downstream of transcription start site)
   variant_groups$promoter <- shared_rows[shared_rows$Func_refgene.x %in% c("upstream", "downstream"), ]
   
+  # EXCEL output
+  wb <- createWorkbook()
+  for (group_name in names(variant_groups)) {
+    addWorksheet(wb, group_name)  
+    writeData(wb, group_name, variant_groups[[group_name]])  
+  }
+  # Save the workbook to the specified file
+  saveWorkbook(wb, output_name, overwrite = TRUE)
+  
   return(variant_groups)
 }
 
@@ -35,7 +50,5 @@ overlap_variant <- function(table1, table2) {
 # Example usage
 # REMAIN TO UPDATE: EXCEL OUTPUT and GROUP-LEVEL COMPARSION
 # -------------------------------------------------------------------
-tmp_overlap_variant <- overlap_variant(D25029_MAF0.01, D25046_MAF0.01)
-
-# Extract the exonic group and select relevant columns
-tmp_overlap_variant$UTR[1:10,1:13]
+DSECD_0.01 <- list(D25029_MAF0.01, D25046_MAF0.01)
+tmp_overlap_variant <- overlap_variant(DSECD_0.01,"../DS-ECD/DSECD_0.01_shareVariant.xlsx")
