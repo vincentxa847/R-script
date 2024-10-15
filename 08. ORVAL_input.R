@@ -66,3 +66,33 @@ orval_datasets <- list(
 
 # Write specified dataset to an Excel workbook
 ORVAL_writeput <- ORVAL_variantList(orval_datasets, "../ORVAL/D25029.ORVAL.xlsx")
+
+
+
+# -----------------------------------------------------------------------------
+#### Analysis of chr21 variants with exonic variants in other chromosome ####
+# -----------------------------------------------------------------------------
+# D25029: ≥ Disease-causing_99.9%-zone, total 3918 entries
+# D25046: ≥ Disease-causing_99.9%-zone, total 2655 entries
+ORVAL_D25046Chr21Exonic <- read.csv(file = "../ORVAL_RESULT/D25046Chr21Exonic.tsv",sep = "\t") 
+
+# Filter Variant Pair with variant on chr21
+# D25029: 46 entries, D25046: 10 entries
+ORVAL_D25046Chr21Exonic_ONLYW21 <- ORVAL_D25046Chr21Exonic[
+  grepl("^21:", ORVAL_D25046Chr21Exonic$GeneA_Alleles) |
+    grepl("^21:", ORVAL_D25046Chr21Exonic$GeneB_Alleles), 
+]
+
+
+# CHD filter (ECD filter result in no data)
+ORVAL_D25046Chr21Exonic_ONLYW21_CHD <- ORVAL_D25046Chr21Exonic_ONLYW21[
+    (ORVAL_D25046Chr21Exonic_ONLYW21$Gene_A %in% gene_lists$HP0001627_CHD |
+       ORVAL_D25046Chr21Exonic_ONLYW21$Gene_B %in% gene_lists$HP0001627_CHD),
+]
+
+# Export the filtered data to a TSV file
+write.table(ORVAL_D25046Chr21Exonic_ONLYW21_CHD, 
+            file = "ORVAL_D25046Chr21Exonic_ONLYW21_CHD.tsv", 
+            sep = "\t",        # Use tab as the separator
+            row.names = FALSE,  # Do not write row names
+            quote = FALSE)      # Do not include quotes around the data
