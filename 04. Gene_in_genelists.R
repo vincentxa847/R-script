@@ -35,7 +35,7 @@ gene_paths <- list(
   hsa04330_Notch = "../GENE_LIST/KEGG/hsa04330_Notch.txt",
   hsa04340_hedgedog = "../GENE_LIST/KEGG/hsa04340_hedgedog.txt",
   hsa04020_calcium_signaling = "../GENE_LIST/KEGG/hsa04020_calcium_signaling.txt",
-  hsa04350_TGFbata = "../GENE_LIST/KEGG/hsa04350_TGFbata.txt",
+  hsa04350_TGFbeta = "../GENE_LIST/KEGG/hsa04350_TGFbata.txt",
   N01453_BMP = "../GENE_LIST/KEGG/N01453_BMP.txt",
   # HPO
   HP0006695_ECD = "../GENE_LIST/HPOList/genes_for_HP_0006695",
@@ -147,7 +147,7 @@ gene_list <- function(input, gene_list, output_name) {
   # 9.hsa04020_calcium_signaling
   gene_list_variant$hsa04020_calcium_signaling <- input %>% filter(Gene_refgene %in% gene_list$hsa04020_calcium_signaling)
   # 10.hsa04350_TGFbata
-  gene_list_variant$hsa04350_TGFbata <- input %>% filter(Gene_refgene %in% gene_list$hsa04350_TGFbata)
+  gene_list_variant$hsa04350_TGFbeta <- input %>% filter(Gene_refgene %in% gene_list$hsa04350_TGFbeta)
   # 11.N01453_BMP
   gene_list_variant$N01453_BMP <- input %>% filter(Gene_refgene %in% gene_list$N01453_BMP)
   # 12.HP0006695_ECD
