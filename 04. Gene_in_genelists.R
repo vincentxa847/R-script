@@ -40,6 +40,9 @@ gene_paths <- list(
   # HPO
   HP0006695_ECD = "../GENE_LIST/HPOList/genes_for_HP_0006695",
   HP0001627_CHD = "../GENE_LIST/HPOList/genes_for_HP_0001627.txt",
+  # Manually Curated gene list
+  TF_cardiac = "../GENE_LIST/TF_cardiac.txt",
+  Folate_DSCHD = "../GENE_LIST/Folate_DSCHD.txt",
   # GO
   protein_folding = "../GENE_LIST/GO/GO0140662_ATPdependent protein folding chaperone.txt"
 )
@@ -150,11 +153,15 @@ gene_list <- function(input, gene_list, output_name) {
   gene_list_variant$hsa04350_TGFbeta <- input %>% filter(Gene_refgene %in% gene_list$hsa04350_TGFbeta)
   # 11.N01453_BMP
   gene_list_variant$N01453_BMP <- input %>% filter(Gene_refgene %in% gene_list$N01453_BMP)
-  # 12.HP0006695_ECD
+  # 12. manually curated heart development TF
+  gene_list_variant$TF_cardiac <- input %>% filter(Gene_refgene %in% gene_list$TF_cardiac)
+  # 13. Folate_DSCHD
+  gene_list_variant$Folate_DSCHD <- input %>% filter(Gene_refgene %in% gene_list$Folate_DSCHD)
+  # 14.HP0006695_ECD
   gene_list_variant$HP0006695_ECD <- input %>% filter(Gene_refgene %in% gene_list$HP0006695_ECD)
-  # 13.HP0001627_CHD
+  # 15.HP0001627_CHD
   gene_list_variant$HP0001627_CHD <- input %>% filter(Gene_refgene %in% gene_list$HP0001627_CHD)
-  # 14. chr21
+  # 16. chr21
   gene_list_variant$chr21 <- input %>% filter(Chr == "21")
   
   ## Prepare genesymbol worksheet and Sort each group by CADD_phred
