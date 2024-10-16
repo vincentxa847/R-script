@@ -22,14 +22,14 @@ clean_illegal_strings <- function(df) {
 
 # Function to summarize the data by Gene and Variant Type, which is a integration of 05.Summarize.R
 summarize_by_gene_variant <- function(df) {
-  # Group by 'Gene_refgene' and 'Func_refgene', then summarize counts
+  # Group by 'Gene.refgene' and 'Func.refgene', then summarize counts
   summary_table <- df %>%
-    group_by(Gene_refgene, Func_refgene) %>%
+    group_by(Gene.refgene, Func.refgene) %>%
     summarize(count = n(), .groups = "drop")
   
   # Pivot table to a wider format, fill missing values with 0
   wide_table <- summary_table %>%
-    tidyr::pivot_wider(names_from = Func_refgene, values_from = count, values_fill = 0)
+    tidyr::pivot_wider(names_from = Func.refgene, values_from = count, values_fill = 0)
   
   # Ensure the required columns ('exonic', 'UTR3', 'UTR5', 'intronic', 'upstream', 'downstream', 'intergenic') are present
   required_columns <- c("exonic", "UTR3", "UTR5", "intronic", "upstream", "downstream", "intergenic")
@@ -41,14 +41,14 @@ summarize_by_gene_variant <- function(df) {
   }
   # Reorder columns to ensure the required columns are at the front
   wide_table <- wide_table %>%
-    dplyr::select(Gene_refgene, all_of(required_columns), everything())
+    dplyr::select(Gene.refgene, all_of(required_columns), everything())
   
   return(wide_table)
 }
 
 # Function to group variants and produce EXCEL output
 group_variants_and_save <- function(data,output_name) {
-
+  
   # Clean the data before processing
   data <- clean_illegal_strings(data)
   
@@ -71,28 +71,28 @@ group_variants_and_save <- function(data,output_name) {
   variant_groups$CADD15 <- subset(data, !is.na(CADD_phred) & round(as.numeric(CADD_phred), 2) >= 15)
   
   # 4. Missense variants with CADD > 15
-  variant_groups$CADD15_missense <- subset(data, !is.na(CADD_phred) & round(as.numeric(CADD_phred), 2) >= 15 & ExonicFunc_refgene == "nonsynonymous SNV")
+  variant_groups$CADD15_missense <- subset(data, !is.na(CADD_phred) & round(as.numeric(CADD_phred), 2) >= 15 & ExonicFunc.refgene == "nonsynonymous SNV")
   
   # 5. All missense variants
-  variant_groups$missense <- subset(data, ExonicFunc_refgene == "nonsynonymous SNV")
+  variant_groups$missense <- subset(data, ExonicFunc.refgene == "nonsynonymous SNV")
   
   # 6. Synonymous variants with CADD > 15
-  variant_groups$synonymous_CADD15 <- subset(data, ExonicFunc_refgene == "synonymous SNV" & !is.na(CADD_phred) & round(as.numeric(CADD_phred), 2) >= 15)
+  variant_groups$synonymous_CADD15 <- subset(data, ExonicFunc.refgene == "synonymous SNV" & !is.na(CADD_phred) & round(as.numeric(CADD_phred), 2) >= 15)
   
   # 7. All synonymous variants
-  variant_groups$synonymous <- subset(data, ExonicFunc_refgene == "synonymous SNV")
+  variant_groups$synonymous <- subset(data, ExonicFunc.refgene == "synonymous SNV")
   
   # 8. All exonic variants
-  variant_groups$exonic <- subset(data, Func_refgene == "exonic")
+  variant_groups$exonic <- subset(data, Func.refgene == "exonic")
   
   # 9. All variants in UTR regions
-  variant_groups$UTR <- subset(data, Func_refgene == "UTR3" | Func_refgene == "UTR5")
+  variant_groups$UTR <- subset(data, Func.refgene == "UTR3" | Func.refgene == "UTR5")
   
   # 10. All intronic variants
-  variant_groups$intronic <- subset(data, Func_refgene == "intronic")
+  variant_groups$intronic <- subset(data, Func.refgene == "intronic")
   
   # 11. Variants in promoter regions (2kb upstream and downstream of transcriptional start site)
-  variant_groups$promoter <- subset(data, Func_refgene == "upstream" | Func_refgene == "downstream")
+  variant_groups$promoter <- subset(data, Func.refgene == "upstream" | Func.refgene == "downstream")
   
   # 12. Variants in conserved regions
   # Calculate thresholds (75th percentile) for phyloP and phastCons scores
@@ -101,12 +101,9 @@ group_variants_and_save <- function(data,output_name) {
   variant_groups$conserved <- subset(data, phyloP470way_mammalian >= phyloP_threshold & phastCons470way_mammalian_rankscore >= phastCons_threshold)
   
   # 13. Variants in non-coding RNAs (ncRNAs)
-  variant_groups$ncRNA <- data[grep("ncRNA", data$Func_refgene),]
+  variant_groups$ncRNA <- data[grep("ncRNA", data$Func.refgene),]
   
   # 14. variants in double-elite enhancers (skip now)
-  # pass
-  
-  # 14. loss of function (unsure the criteria, skip now)
   # pass
   
   ## Prepare genesymbol worksheet and Sort each group by CADD_phred
@@ -121,14 +118,14 @@ group_variants_and_save <- function(data,output_name) {
         arrange(desc(CADD_phred))  # Sort in descending order by CADD_phred
     }
     
-    gene_column <- variant_groups[[group_name]]$Gene_refgene
+    gene_column <- variant_groups[[group_name]]$Gene.refgene
     
     # Fill with empty string for unequal lengths
     gene_refgene_list[[group_name]] <- c(gene_column, rep("", max(0, max(sapply(variant_groups, nrow)) - length(gene_column))))
   }
   # Convert the list to a data frame
   gene_refgene_df <- as.data.frame(gene_refgene_list)
-
+  
   ## Prepare summary worksheet
   summarized_results <- lapply(variant_groups, summarize_by_gene_variant)
   names(summarized_results) <- names(variant_groups)
@@ -156,7 +153,7 @@ group_variants_and_save <- function(data,output_name) {
   
   # Save the workbook to the specified file
   saveWorkbook(wb, output_name, overwrite = TRUE)
-
+  
   # Return the list of grouped variants
   return(variant_groups)
 }
