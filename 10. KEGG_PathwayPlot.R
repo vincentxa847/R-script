@@ -1,13 +1,13 @@
-library(org.Hs.eg.db)     
-
+library(org.Hs.eg.db)
+library(pathview)
 # -----------------------------------------------------------------------------
 # Plot genes associated with variants in the KEGG pathway. 
 # This visualization includes all genes with variant(s), regardless of the type or number of variants they have.
 # Genes with available CADD scores will be highlighted in the plot.
 # -----------------------------------------------------------------------------
 kegg_genesWithVariant_CADD <- function(sample, table_name, pathway_id, output_dir) {
-  # Extract relevant columns: Gene_refgene and CADD_phred
-  gene_cadd_df <- sample[[table_name]][, c("Gene_refgene", "CADD_phred")]
+  # Extract relevant columns: Gene.refgene and CADD_phred
+  gene_cadd_df <- sample[[table_name]][, c("Gene.refgene", "CADD_phred")]
   # Handle CADD value
   gene_cadd_df$CADD_phred[gene_cadd_df$CADD_phred == "."] <- 0
   gene_cadd_df$CADD_phred <- as.numeric(gene_cadd_df$CADD_phred)
@@ -17,17 +17,17 @@ kegg_genesWithVariant_CADD <- function(sample, table_name, pathway_id, output_di
     message("All CADD_phred values are zero. Assigning 0.001 to the first gene for visualization.")
     gene_cadd_df$CADD_phred[1] <- 0.001  # Assign 0.001 to the first row
   
-  # Remove duplicates based on Gene_refgene and CADD_phred
+  # Remove duplicates based on Gene.refgene and CADD_phred
   unique_gene_cadd_df <- unique(gene_cadd_df)
   
   # Convert gene symbols to Entrez IDs
-  entrez_genes <- clusterProfiler::bitr(unique_gene_cadd_df$Gene_refgene, 
+  entrez_genes <- clusterProfiler::bitr(unique_gene_cadd_df$Gene.refgene, 
                                         fromType = "SYMBOL", 
                                         toType = "ENTREZID", 
                                         OrgDb = org.Hs.eg.db)
   
   # Merge Entrez IDs with CADD_phred values
-  entrez_genes <- merge(entrez_genes, unique_gene_cadd_df, by.x = "SYMBOL", by.y = "Gene_refgene")
+  entrez_genes <- merge(entrez_genes, unique_gene_cadd_df, by.x = "SYMBOL", by.y = "Gene.refgene")
 
   # Filter rows where CADD_phred is not zero
   non_zero_cadd_genes <- entrez_genes[entrez_genes$CADD_phred != 0, ]
