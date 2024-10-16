@@ -7,10 +7,12 @@ library(SKAT)
 extract_genotype <- function(sample_data, genes) {
   
   # Filter the sample data
-  filtered_data <- sample_data[sample_data$Gene_refgene %in% genes, ]
+  filtered_data <- sample_data[sample_data$Gene.refgene %in% genes, ]
   
-  # Create a variant identifier by combining "Chr" and "Start"
-  filtered_data$Variant <- paste(filtered_data$Chr, filtered_data$Start, sep = "_")
+  # Create a variant identifier by combining "Gene.refgene", "Chr", "Start", "End", "Ref", "Alt"
+  filtered_data$Variant <- paste(filtered_data$Gene.refgene, filtered_data$Chr, 
+                                 filtered_data$Start, filtered_data$End,
+                                 filtered_data$Ref, filtered_data$Alt, sep = "_")
   
   # Convert genotypes ('het' -> 1, 'hom' -> 2)
   genotypes <- ifelse(filtered_data$Otherinfo1 == "het", 1, 2)
