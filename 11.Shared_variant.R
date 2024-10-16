@@ -97,15 +97,9 @@ ggVennDiagram(venn_data, color = "black",
 unique_table2 <- anti_join(D25046_MAF0.01, D25029_MAF0.01, by = "ID")
 
 
-# Find shared variants of three groups (6745)
+# Find shared variants of three groups (11993)
 shared_variants <- Reduce(intersect, venn_data)
 shared_variants <- trimws(shared_variants)
-
-# Loop through each data frame and extract matching rows
-# it seems that multiple rows with same id, which result in more records as expect
-duplicated_ids <- D25029_MAF0.01$ID[duplicated(D25029_MAF0.01$ID)]
-rows_with_duplicates <- D25029_MAF0.01[D25029_MAF0.01$ID %in% duplicated_ids, ]
-
-tmp <- D25029_MAF0.01[D25029_MAF0.01$ID %in% shared_variants,]
-tmp <- tmp[!duplicated(tmp),]
+# Using one group can fetch the shared variants of three groups 
+shared_variants_data <- D25007_MAF0.01 %>% filter(ID %in% shared_variants)
 
