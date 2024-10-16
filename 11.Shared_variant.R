@@ -1,5 +1,7 @@
 library(dplyr) 
 library(openxlsx)
+library(ggplot2)
+library(ggVennDiagram)
 
 # -------------------------------------------------------------------
 # Function to identify overlapping variants between two samples
@@ -52,3 +54,45 @@ overlap_variant <- function(tables, output_name) {
 # -------------------------------------------------------------------
 DSECD_0.01 <- list(D25029_MAF0.01, D25046_MAF0.01)
 tmp_overlap_variant <- overlap_variant(DSECD_0.01,"../DS-ECD/DSECD_0.01_shareVariant.xlsx")
+
+# -------------------------------------------------------------------
+# Compare two tables in R and visualize the shared and unique rows
+# -------------------------------------------------------------------
+# Create the ID column for D25029_MAF0.01
+D25029_MAF0.01 <- D25029_MAF0.01 %>%
+  mutate(ID = paste(Chr, Start, End, Ref, Alt, sep = "_"))
+
+# Create the ID column for D25046_MAF0.01
+D25046_MAF0.01 <- D25046_MAF0.01 %>%
+  mutate(ID = paste(Chr, Start, End, Ref, Alt, sep = "_"))
+
+# Create the ID column for D25165_MAF0.01
+D25165_MAF0.01 <- D25165_MAF0.01 %>%
+  mutate(ID = paste(Chr, Start, End, Ref, Alt, sep = "_"))
+
+# Create the ID column for D25168_MAF0.01
+D25168_MAF0.01 <- D25168_MAF0.01 %>%
+  mutate(ID = paste(Chr, Start, End, Ref, Alt, sep = "_"))
+
+# Find unique rows in D25046_MAF0.01
+unique_table2 <- anti_join(D25046_MAF0.01, D25029_MAF0.01, by = "ID")
+
+# Variant Id within group to plot
+venn_data <- list(
+  DS_ECD = c(D25029_MAF0.01$ID,D25046_MAF0.01$ID),
+  DS_nonECD = c(D25165_MAF0.01$ID,D25168_MAF0.01$ID)
+)
+
+# Venn diagram
+# TODO: label position need to be changed
+ggVennDiagram(venn_data, color = "black", 
+              lwd = 0.8, lty = 1) + 
+              scale_fill_gradient(low = "#F4FAFE", high = "#4981BF")
+
+
+### Extract shared and unique variants
+# Find shared rows based on the new ID column
+shared_rows <- inner_join(D25029_MAF0.01, D25046_MAF0.01, by = "ID")
+
+# Find unique rows in D25029_MAF0.01
+unique_table1 <- anti_join(D25029_MAF0.01, D25046_MAF0.01, by = "ID")
