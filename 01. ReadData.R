@@ -32,6 +32,9 @@ ReadData <- function(filePath){
   # Variants in multiple overlapping genes were included in each gene separately 
   combined_data <- combined_data %>%
     tidyr::separate_rows(Gene.refgene, sep = ";")
+
+  # Ambiguous annotation result in duplicated row, remove it
+  combined_data <- combined_data[!duplicated(combined_data),]
   
   # Return the cleaned-up and reordered data (optional: write to output file)
   #write.table(combined_data, file = output_name, col.names=TRUE, row.names=FALSE, sep = "\t")
