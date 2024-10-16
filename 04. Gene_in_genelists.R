@@ -35,7 +35,7 @@ gene_paths <- list(
   hsa04330_Notch = "../GENE_LIST/KEGG/hsa04330_Notch.txt",
   hsa04340_hedgedog = "../GENE_LIST/KEGG/hsa04340_hedgedog.txt",
   hsa04020_calcium_signaling = "../GENE_LIST/KEGG/hsa04020_calcium_signaling.txt",
-  hsa04350_TGFbeta = "../GENE_LIST/KEGG/hsa04350_TGFbata.txt",
+  hsa04350_TGFbeta = "../GENE_LIST/KEGG/hsa04350_TGFbeta.txt",
   N01453_BMP = "../GENE_LIST/KEGG/N01453_BMP.txt",
   # HPO
   HP0006695_ECD = "../GENE_LIST/HPOList/genes_for_HP_0006695",
@@ -53,7 +53,6 @@ gene_lists <- lapply(gene_paths, read_gene_list)
 # -----------------------------------------------------------------------------
 #### Output a list of gene for IPA #### 
 # -----------------------------------------------------------------------------
-# -----------------------------------------------------------------------------
 # TODO: Investigate how to use IPA (Ingenuity Pathway Analysis) for variant analysis
 #       and determine what additional information should be included.
 # -----------------------------------------------------------------------------
@@ -62,8 +61,8 @@ gene_lists <- lapply(gene_paths, read_gene_list)
 # If more than one variant exists in a gene, multiple gene symbols may be written.
 # These duplicates will be handled (removed) during IPA processing.
 writeout_list <- function(table, gene_list, output_name) {
-  output <- table %>% filter(Gene_refgene %in% gene_list)
-  output <- output$Gene_refgene 
+  output <- table %>% filter(Gene.refgene %in% gene_list)
+  output <- output$Gene.refgene 
   
   file_path <- paste0("../IPA/", output_name, ".txt")
   
@@ -94,14 +93,14 @@ clean_illegal_strings <- function(df) {
 
 # Function to summarize the data by Gene and Variant Type, which is a integration of 05.Summarize.R
 summarize_by_gene_variant <- function(df) {
-  # Group by 'Gene_refgene' and 'Func_refgene', then summarize counts
+  # Group by 'Gene.refgene' and 'Func.refgene', then summarize counts
   summary_table <- df %>%
-    group_by(Gene_refgene, Func_refgene) %>%
+    group_by(Gene.refgene, Func.refgene) %>%
     summarize(count = n(), .groups = "drop")
   
   # Pivot table to a wider format, fill missing values with 0
   wide_table <- summary_table %>%
-    tidyr::pivot_wider(names_from = Func_refgene, values_from = count, values_fill = 0)
+    tidyr::pivot_wider(names_from = Func.refgene, values_from = count, values_fill = 0)
   
   # Ensure the required columns ('exonic', 'UTR3', 'UTR5', 'intronic', 'upstream', 'downstream', 'intergenic') are present
   required_columns <- c("exonic", "UTR3", "UTR5", "intronic", "upstream", "downstream", "intergenic")
@@ -113,7 +112,7 @@ summarize_by_gene_variant <- function(df) {
   }
   # Reorder columns to ensure the required columns are at the front
   wide_table <- wide_table %>%
-    dplyr::select(Gene_refgene, all_of(required_columns), everything())
+    dplyr::select(Gene.refgene, all_of(required_columns), everything())
   
   return(wide_table)
 }
@@ -121,10 +120,10 @@ summarize_by_gene_variant <- function(df) {
 # Function to include variants in gene list and produce EXCEL output
 gene_list <- function(input, gene_list, output_name) {
   
-  if (!"Gene_refgene" %in% colnames(input)) {
-    stop("The input data does not contain a column named 'Gene_refgene'.")
+  if (!"Gene.refgene" %in% colnames(input)) {
+    stop("The input data does not contain a column named 'Gene.refgene'.")
   }
-
+  
   # Clean the data before processing
   input <- clean_illegal_strings(input)
   
@@ -132,37 +131,38 @@ gene_list <- function(input, gene_list, output_name) {
   gene_list_variant <- list()
   
   # 1.top_candidate_genes
-  gene_list_variant$top_candidate_genes <- input %>% filter(Gene_refgene %in% gene_list$top_candidate_genes)
+  gene_list_variant$top_candidate_genes <- input %>% filter(Gene.refgene %in% gene_list$top_candidate_genes)
   # 2.top_candidate_related_genes
-  gene_list_variant$top_candidate_related_genes <- input %>% filter(Gene_refgene %in% gene_list$top_candidate_related_genes)
+  gene_list_variant$top_candidate_related_genes <- input %>% filter(Gene.refgene %in% gene_list$top_candidate_related_genes)
   # 3.candidate_genes
-  gene_list_variant$candidate_genes <- input %>% filter(Gene_refgene %in% gene_list$candidate_genes)
+  gene_list_variant$candidate_genes <- input %>% filter(Gene.refgene %in% gene_list$candidate_genes)
   # 4.cilium
-  gene_list_variant$cilium <- input %>% filter(Gene_refgene %in% gene_list$cilium)
+  gene_list_variant$cilium <- input %>% filter(Gene.refgene %in% gene_list$cilium)
   # 5.ECM_interaction
-  gene_list_variant$ECM_interaction <- input %>% filter(Gene_refgene %in% gene_list$ECM_interaction)
+  gene_list_variant$ECM_interaction <- input %>% filter(Gene.refgene %in% gene_list$ECM_interaction)
   # 6.hsa04310_Wnt
-  gene_list_variant$hsa04310_Wnt <- input %>% filter(Gene_refgene %in% gene_list$hsa04310_Wnt)
+  gene_list_variant$hsa04310_Wnt <- input %>% filter(Gene.refgene %in% gene_list$hsa04310_Wnt)
   # 7.hsa04330_Notch
-  gene_list_variant$hsa04330_Notch <- input %>% filter(Gene_refgene %in% gene_list$hsa04330_Notch)
+  gene_list_variant$hsa04330_Notch <- input %>% filter(Gene.refgene %in% gene_list$hsa04330_Notch)
   # 8.hsa04340_hedgedog
-  gene_list_variant$hsa04340_hedgedog <- input %>% filter(Gene_refgene %in% gene_list$hsa04340_hedgedog)
+  gene_list_variant$hsa04340_hedgedog <- input %>% filter(Gene.refgene %in% gene_list$hsa04340_hedgedog)
   # 9.hsa04020_calcium_signaling
-  gene_list_variant$hsa04020_calcium_signaling <- input %>% filter(Gene_refgene %in% gene_list$hsa04020_calcium_signaling)
-  # 10.hsa04350_TGFbata
-  gene_list_variant$hsa04350_TGFbeta <- input %>% filter(Gene_refgene %in% gene_list$hsa04350_TGFbeta)
+  gene_list_variant$hsa04020_calcium_signaling <- input %>% filter(Gene.refgene %in% gene_list$hsa04020_calcium_signaling)
+  # 10.hsa04350_TGFbeta
+  gene_list_variant$hsa04350_TGFbeta <- input %>% filter(Gene.refgene %in% gene_list$hsa04350_TGFbeta)
   # 11.N01453_BMP
-  gene_list_variant$N01453_BMP <- input %>% filter(Gene_refgene %in% gene_list$N01453_BMP)
+  gene_list_variant$N01453_BMP <- input %>% filter(Gene.refgene %in% gene_list$N01453_BMP)
   # 12. manually curated heart development TF
-  gene_list_variant$TF_cardiac <- input %>% filter(Gene_refgene %in% gene_list$TF_cardiac)
+  gene_list_variant$TF_cardiac <- input %>% filter(Gene.refgene %in% gene_list$TF_cardiac)
   # 13. Folate_DSCHD
-  gene_list_variant$Folate_DSCHD <- input %>% filter(Gene_refgene %in% gene_list$Folate_DSCHD)
+  gene_list_variant$Folate_DSCHD <- input %>% filter(Gene.refgene %in% gene_list$Folate_DSCHD)
   # 14.HP0006695_ECD
-  gene_list_variant$HP0006695_ECD <- input %>% filter(Gene_refgene %in% gene_list$HP0006695_ECD)
+  gene_list_variant$HP0006695_ECD <- input %>% filter(Gene.refgene %in% gene_list$HP0006695_ECD)
   # 15.HP0001627_CHD
-  gene_list_variant$HP0001627_CHD <- input %>% filter(Gene_refgene %in% gene_list$HP0001627_CHD)
+  gene_list_variant$HP0001627_CHD <- input %>% filter(Gene.refgene %in% gene_list$HP0001627_CHD)
   # 16. chr21
   gene_list_variant$chr21 <- input %>% filter(Chr == "21")
+  
   
   ## Prepare genesymbol worksheet and Sort each group by CADD_phred
   # Create a list to hold Gene_refgene columns for all groups
@@ -176,14 +176,14 @@ gene_list <- function(input, gene_list, output_name) {
         arrange(desc(CADD_phred))  # Sort in descending order by CADD_phred
     }
     
-    gene_column <- gene_list_variant[[group_name]]$Gene_refgene
+    gene_column <- gene_list_variant[[group_name]]$Gene.refgene
     
     # Fill with empty string for unequal lengths
     gene_refgene_list[[group_name]] <- c(gene_column, rep("", max(0, max(sapply(gene_list_variant, nrow)) - length(gene_column))))
   }
   # Convert the list to a data frame
   gene_refgene_df <- as.data.frame(gene_refgene_list)
-
+  
   ## Prepare summary worksheet
   summarized_results <- lapply(gene_list_variant, summarize_by_gene_variant)
   names(summarized_results) <- names(gene_list_variant)
@@ -222,7 +222,7 @@ gene_list <- function(input, gene_list, output_name) {
 D25007_GeneList <- gene_list(D25007_MAF0.01,gene_lists,"../nonDS-ECD/D25007/D25007_MAF0.01.gene_lists.xlsx")
 D25029_GeneList <- gene_list(D25029_MAF0.01,gene_lists,"../DS-ECD/D25029/D25029_MAF0.01.gene_lists.xlsx")
 D25046_GeneList <- gene_list(D25046_MAF0.01,gene_lists,"../DS-ECD/D25046/D25046_MAF0.01.gene_lists.xlsx")
-
+D25163_GeneList <- gene_list(D25163_MAF0.01,gene_lists,"../DS-nonECD/D25163/D25163_MAF0.01.gene_lists.xlsx")
 D25165_GeneList <- gene_list(D25165_MAF0.01,gene_lists,"../DS-nonECD/D25165/D25165_MAF0.01.gene_lists.xlsx")
 D25168_GeneList <- gene_list(D25168_MAF0.01,gene_lists,"../DS-nonECD/D25168/D25168_MAF0.01.gene_lists.xlsx")
 
