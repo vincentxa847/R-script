@@ -1,3 +1,5 @@
+library(dplyr) 
+
 #### Function to read tsv file that filter was applied using awk command ####
 # Pre-Filter is Quality (Otherinfo9, col 267) ≥ 300 & Het (Het_Percent, col 359) > 15 & MAF (Max Allele Freq, 354) ≤0.01 | ==0 
 ReadData <- function(filePath){
