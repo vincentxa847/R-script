@@ -36,6 +36,7 @@ gene_paths <- list(
   hsa04340_hedgedog = "../GENE_LIST/KEGG/hsa04340_hedgedog.txt",
   hsa04020_calcium_signaling = "../GENE_LIST/KEGG/hsa04020_calcium_signaling.txt",
   hsa04350_TGFbeta = "../GENE_LIST/KEGG/hsa04350_TGFbeta.txt",
+  hsa04350_Hippo = "../GENE_LIST/KEGG/hsa04390_Hippo.txt",
   N01453_BMP = "../GENE_LIST/KEGG/N01453_BMP.txt",
   # HPO
   HP0006695_ECD = "../GENE_LIST/HPOList/genes_for_HP_0006695",
@@ -152,15 +153,17 @@ gene_list <- function(input, gene_list, output_name) {
   gene_list_variant$hsa04350_TGFbeta <- input %>% filter(Gene.refgene %in% gene_list$hsa04350_TGFbeta)
   # 11.N01453_BMP
   gene_list_variant$N01453_BMP <- input %>% filter(Gene.refgene %in% gene_list$N01453_BMP)
-  # 12. manually curated heart development TF
+  # 12. hsa04350_Hippo
+  gene_list_variant$hsa04350_Hippo <- input %>% filter(Gene.refgene %in% gene_list$hsa04350_Hippo)
+  # 13. manually curated heart development TF
   gene_list_variant$TF_cardiac <- input %>% filter(Gene.refgene %in% gene_list$TF_cardiac)
-  # 13. Folate_DSCHD
+  # 14. Folate_DSCHD
   gene_list_variant$Folate_DSCHD <- input %>% filter(Gene.refgene %in% gene_list$Folate_DSCHD)
-  # 14.HP0006695_ECD
+  # 15.HP0006695_ECD
   gene_list_variant$HP0006695_ECD <- input %>% filter(Gene.refgene %in% gene_list$HP0006695_ECD)
-  # 15.HP0001627_CHD
+  # 16.HP0001627_CHD
   gene_list_variant$HP0001627_CHD <- input %>% filter(Gene.refgene %in% gene_list$HP0001627_CHD)
-  # 16. chr21
+  # 17. chr21
   gene_list_variant$chr21 <- input %>% filter(Chr == "21")
   
   
