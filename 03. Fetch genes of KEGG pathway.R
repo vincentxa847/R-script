@@ -7,10 +7,12 @@ library(org.Hs.eg.db)
 # Function to fetch gene list from KEGG pathway
 fetch_kegg_gene_list <- function(pathway_id, output_file) {
   # Construct the URL to fetch gene data from KEGG API
-  url <- paste0("http://rest.kegg.jp/link/hsa/", pathway_id)
+  # TODO: If http cannot fetch then fall back to https here
+  url <- paste0("https://rest.kegg.jp/link/hsa/", pathway_id)
   
   # Retrieve gene data from the URL
-  gene_data <- read.table(url, header = FALSE, sep = "\t")
+  gene_data_raw <- readLines(url)
+  gene_data <- read.table(text = paste(gene_data_raw, collapse = "\n"), header = FALSE, sep = "\t")
   
   # Extract the KEGG gene IDs by removing the 'hsa:' prefix
   gene_ids <- sub("hsa:", "", gene_data$V2)
