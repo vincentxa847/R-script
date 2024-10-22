@@ -136,18 +136,6 @@ qqplot_pvalues <- function(pvals, genelist) {
       legend.position = "top"
     )
   
-  # Add gene names for top 5 genes
-  plot <- plot + 
-    geom_text_repel(
-      data = qq_data[qq_data$is_top5, ], 
-      aes(label = top5_genes), 
-      color = "red", 
-      size = 3, 
-      box.padding = 0.35, 
-      point.padding = 0.3, 
-      segment.color = 'gray'
-    )
-  
   return(plot)
 }
 
