@@ -165,6 +165,8 @@ gene_list <- function(input, gene_list, output_name) {
   gene_list_variant$HP0001627_CHD <- input %>% filter(Gene.refgene %in% gene_list$HP0001627_CHD)
   # 17. chr21
   gene_list_variant$chr21 <- input %>% filter(Chr == "21")
+  # 18. Novel Variant (MAF is 0 and no RSID)
+  gene_list_variant$Novel <- input %>% filter(as.numeric(Max.Allele.Freq) == 0 & dbSNP == ".")
   
   
   ## Prepare genesymbol worksheet and Sort each group by CADD_phred
