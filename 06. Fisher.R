@@ -1,91 +1,155 @@
 library(dplyr)
-#### Prepare data for Fisher test ####
-## Function to count number of variant in each gene of gene list
-variants_in_genes <- function(target_gene, variants, name){
-  # count variant number of each genes and set column name
-  raw <- variants %>%
-    group_by(Gene_refgene) %>%
-    summarise(!!sym(name) := n())  
-  
-  # extract data of gene in gene list and replace NA with 0 for missing counts
-  gene_and_count <- target_gene %>%
-    left_join(raw, by = "Gene_refgene") %>%
-    mutate(!!sym(name) := ifelse(is.na(!!sym(name)), 0, !!sym(name)))
-  
-  return (gene_and_count)
-}
+library(ggplot2)
+library(ggrepel)
 
-## Function to apply the function to each sample in each group and store the results
-combine_variants_in_genes <- function(group, gene_list, sample_names) {
-  results_list <- list()
+# -----------------------------------------------------------------------------
+# Perform rare variant collapsing analysis
+# GeneList relevant to phenotype and qualifying variants table of case and control will be input
+# Create gene-by-individual collapsing matrix which indicates the presence of at least one QV
+# Each gene is tested for an association between QV status and the phenotype of interest using Fisher Exact Test
+# Fisher's Exact Test provides an exact p-value based on the observed data, regardless of sample size
+# This is particularly beneficial when dealing with small datasets where the distribution of the data does not approximate normality
+# Evaluate result by quantile-quantile plot (QQ plot)
+# Reference : Rare- variant collapsing analyses for complex traits: guidelines and applications (Nat Rev Genet. 2019)
+# -----------------------------------------------------------------------------
+perform_fisher_test <- function(genelist, case_tables, control_tables) {
   
-  # Loop through each group sample and apply the variants_in_genes function
-  for (i in seq_along(group)) {
-    variants <- group[[i]]
-    name <- sample_names[i]
+  # Helper function to create gene by individual collapsing matrix for cases or controls
+  gene_by_individual_collapsing_matrix <- function(genelist, CaseorControl) {
     
-    results_list[[i]] <- variants_in_genes(gene_list, variants, name)
+    # Initialize an empty matrix with rows as genelist and columns as number of samples (tables in CaseorControl)
+    result_matrix <- matrix(0, nrow = length(genelist), ncol = length(CaseorControl),
+                            dimnames = list(genelist, paste0("Sample_", seq_along(CaseorControl))))
+    
+    # Loop over each sample (table) in CaseorControl
+    for (i in seq_along(CaseorControl)) {
+      # Get the current sample's table
+      sample_table <- CaseorControl[[i]]
+      
+      # Filter the table by CADD_phred > 15 and Gene.refgene in the genelist
+      filtered_table <- subset(sample_table, CADD_phred != "." & 
+                                 round(as.numeric(CADD_phred), 2) >= 15  & Gene.refgene %in% genelist)
+      
+      # Count the number of occurrences for each gene in genelist
+      gene_counts <- table(filtered_table$Gene.refgene)
+      
+      # Match gene names from gene_counts to row names of the result_matrix
+      matching_genes <- match(names(gene_counts), rownames(result_matrix))
+      
+      # Update the result matrix with 1 (presence of QV) if gene is present, otherwise leave as 0
+      result_matrix[matching_genes[!is.na(matching_genes)], i] <- 1
+    }
+    
+    return(result_matrix)
   }
   
-  # Combine the results into one data frame using full_join
-  final_results <- Reduce(function(x, y) full_join(x, y, by = "Gene_refgene"), results_list)
+  # Create gene-by-individual matrices for cases and controls
+  case_matrix <- gene_by_individual_collapsing_matrix(genelist, case_tables)
+  control_matrix <- gene_by_individual_collapsing_matrix(genelist, control_tables)
   
-  # View the final combined result
-  print(final_results)
+  # Collapse rare variants per gene (sum across all individuals in cases and controls)
+  case_collapsed <- rowSums(case_matrix)
+  control_collapsed <- rowSums(control_matrix)
   
-  # Return the combined result
-  return(final_results)
+  # Number of cases and controls
+  num_cases <- length(case_tables)
+  num_controls <- length(control_tables)
+  
+  # Fisher's Exact Test for each gene
+  p_values <- numeric(length(genelist))
+  
+  for (i in seq_along(genelist)) {
+    # Create a 2x2 table for the current gene
+    contingency_table <- matrix(c(
+      case_collapsed[i],                   # Rare variants in cases
+      num_cases - case_collapsed[i],      # No rare variant in cases
+      control_collapsed[i],                # Rare variants in controls
+      num_controls - control_collapsed[i]  # No rare variant in controls
+    ), nrow = 2, byrow = TRUE)
+    
+    # Perform Fisher's Exact Test
+    test <- fisher.test(contingency_table)
+    p_values[i] <- test$p.value
+  }
+  
+  # Return the p-values
+  return(p_values)
 }
 
-#### Fisher’s exact test on mutation burden ####
-Fisher_mutation_burden <- function(case, control) {
+# Example usage
+genelist <- gene_lists$cilium
+case_tables <- list(D25029_GeneList$cilium, D25046_GeneList$cilium)
+control_tables <- list(D25007_GeneList$cilium)
+
+# Perform the Fisher test with the original setup
+p_values <- perform_fisher_test(genelist, case_tables, control_tables)
+
+### Create a QQ-Plot
+qqplot_pvalues <- function(pvals, genelist) {
+  n <- length(pvals)
   
-  # Count how many samples in the case group have at least one variant
-  samples_with_variants_case <- sum(colSums(as.data.frame(case[,-1])) > 0)  # Count of samples with at least one variant
-  total_case_samples <- ncol(case)  # Total number of samples in case group
+  # Expected values
+  expected <- -log10((1:n) / n)
   
-  # Count how many samples in the control group have at least one variant
-  samples_with_variants_control <- sum(colSums(as.data.frame(control[,-1])) > 0)  # Count of samples with at least one variant
-  total_control_samples <- ncol(control)  # Total number of samples in control group
+  # Observed values
+  observed <- -log10(sort(pvals))
   
-  # Calculate the number of samples without variants
-  samples_without_variants_case <- total_case_samples - samples_with_variants_case
-  samples_without_variants_control <- total_control_samples - samples_with_variants_control
+  # Get the indices of the top 5 smallest p-value
+  top5_indices <- order(pvals)[1:5]
   
-  # Create a 2x2 contingency table
-  table <- matrix(c(
-    samples_with_variants_case, samples_without_variants_case,  # case group: presence vs absence of variants
-    samples_with_variants_control, samples_without_variants_control  # control group: presence vs absence of variants
-  ), nrow = 2)
+  # Get the top 5 gene names
+  top5_genes <- genelist[top5_indices]
   
-  # Perform Fisher's exact test
-  test <- fisher.test(table)
+  # Calculate genomic inflation factor (lambda)
+  lambda <- round(median(qchisq(pvals, df = 1, lower.tail = FALSE)) / qchisq(0.5, df = 1), 3)
   
-  # Return the p-value, odds ratio, and confidence intervals
-  results <- data.frame(
-    p_value = test$p.value,
-    OR_fisher = test$estimate,
-    OR_fisher_ci_left = test$conf.int[1],
-    OR_fisher_ci_right = test$conf.int[2]
+  # Calculate the 95% confidence intervals for the expected values (2.5th and 97.5th percentiles)
+  ci_lower <- -log10(qbeta(0.025, seq(1, n), rev(seq(n, 1))))
+  ci_upper <- -log10(qbeta(0.975, seq(1, n), rev(seq(n, 1))))
+  
+  # Prepare the data frame for ggplot2
+  qq_data <- data.frame(
+    expected = expected,
+    observed = observed,
+    ci_lower = ci_lower,
+    ci_upper = ci_upper,
+    is_top5 = FALSE  # Placeholder for top 5
   )
   
-  return(results)
+  # Mark the top 5 genes in the data
+  qq_data$is_top5[top5_indices] <- TRUE
+  
+  # Create the QQ plot with ggplot2
+  plot <- ggplot(qq_data, aes(x = expected, y = observed)) +
+    geom_point(size = 1.5, color = "#1E4C9C") +  # Add the points for observed vs expected
+    geom_line(aes(y = ci_lower), color = "#FBDFE2") +  # 2.5th percentile
+    geom_line(aes(y = ci_upper), color = "#B83945") +  # 97.5th percentile
+    labs(
+      title = paste0("QQ-Plot Lambda = ", lambda),
+      x = "Expected -log10(p-value)",
+      y = "Observed -log10(p-value)"
+    ) +
+    theme_minimal() +  # Clean minimal theme
+    theme(
+      plot.title = element_text(hjust = 0.5),  # Center the plot title
+      panel.grid = element_blank(),
+      legend.position = "top"
+    )
+  
+  # Add gene names for top 5 genes
+  plot <- plot + 
+    geom_text_repel(
+      data = qq_data[qq_data$is_top5, ], 
+      aes(label = top5_genes), 
+      color = "red", 
+      size = 3, 
+      box.padding = 0.35, 
+      point.padding = 0.3, 
+      segment.color = 'gray'
+    )
+  
+  return(plot)
 }
 
-#### Analysis of the mutation burden of rare non-synonymous variants (missense) in cilium components across DS-ECD and non-DS-ECD samples ####
-## Gene List to analysis (cilium_components in this case)
-cilium_components <- read.csv("../GENE_LIST/cilium_components.txt",
-                              header = FALSE, sep = "\t", 
-                              stringsAsFactors = FALSE, col.names = "Gene_refgene")
-
-
-## Combine rare non-synonymous variants of samples of each group into a list 
-DS_ECD <- list(D25029_MAF0.01_missense, D25046_MAF0.01_missense)
-nonDS_ECD <- list(D25007_MAF0.01_missense)
-# change based on group, for example : c("D250029_MAF0.01_missense","D250046_MAF0.01_missense") for DS_ECD
-sample_names <- c("D25007_MAF0.01_missense")
-
-Fisher_cilium_components_DSECD <- combine_variants_in_genes(DS_ECD, cilium_components, sample_names)
-Fisher_cilium_components_nonDSECD <- combine_variants_in_genes(nonDS_ECD, cilium_components, sample_names)
-
-test <- Fisher_mutation_burden(Fisher_cilium_components_DSECD,Fisher_cilium_components_nonDSECD)
+# Plot the QQ-plot
+qqplot_pvalues(p_values, gene_lists$cilium)
