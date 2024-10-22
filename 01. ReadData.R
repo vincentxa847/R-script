@@ -15,10 +15,12 @@ ReadData <- function(filePath){
   tmp <- read.table(filePath, header = TRUE, sep = "\t", fill = TRUE, quote = "")
   
   # Columns to move to the front
-  front_columns <- c("Gene.refgene", "ExonicFunc.refgene", "CADD_phred", "REVEL_score", 
-                     "Severity.Score", "Polyphen2_HDIV_score", "Polyphen2_HVAR_score",
+  front_columns <- c("Gene.refgene", "Chr", "Start", "End", "Ref", "Alt", "Func.refgene",
+                     "ExonicFunc.refgene", "CADD_phred", "REVEL_score", "Severity.Score",
+                     "Polyphen2_HDIV_score", "Polyphen2_HVAR_score", "Het_Percent",
                      "SIFT_score", "dbSNP", "ClinVar", "HGMD.Variant.Class", "Max.Allele.Freq", 
-                     "Taiwan.Biobank", "Het_Percent", "Nucleotide", "AAChange")
+                     "Taiwan.Biobank", "Nucleotide", "AAChange", 
+                     "SpliceAI_DS_AG", "SpliceAI_DS_AL", "SpliceAI_DS_DG", "SpliceAI_DS_DL")
   
   # Get all column names
   all_columns <- trimws(colnames(tmp))
