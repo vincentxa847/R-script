@@ -54,7 +54,7 @@ exclusive_refgene_DSECD <- rbind(
   D25046_variantgroup$exonic[,c(1:27)] %>% filter(Gene.refgene %in% exclusive_refgene_DSECDID),
   D25046_variantgroup$UTR[,c(1:27)] %>% filter(Gene.refgene %in% exclusive_refgene_DSECDID),
   D25046_GeneList$Af_splicing[,c(1:27)] %>% filter(Gene.refgene %in% exclusive_refgene_DSECDID)
-) %>% distinct(Gene.refgene, .keep_all = TRUE)
+)
 
 exclusive_refgene_DSnonECD <- rbind(
   D25163_variantgroup$exonic[,c(1:27)] %>% filter(Gene.refgene %in% exclusive_refgene_DSnonECDID),
@@ -66,7 +66,7 @@ exclusive_refgene_DSnonECD <- rbind(
   D25168_variantgroup$exonic[,c(1:27)] %>% filter(Gene.refgene %in% exclusive_refgene_DSnonECDID),
   D25168_variantgroup$UTR[,c(1:27)] %>% filter(Gene.refgene %in% exclusive_refgene_DSnonECDID),
   D25168_GeneList$Af_splicing[,c(1:27)] %>% filter(Gene.refgene %in% exclusive_refgene_DSnonECDID)
-) %>% distinct(Gene.refgene, .keep_all = TRUE)
+)
 
 exclusive_shared_DSECD_nonDSECD <- rbind(
   D25029_variantgroup$exonic[,c(1:27)] %>% filter(Gene.refgene %in% exclusive_shared_DSECD_nonDSECD),
@@ -75,7 +75,7 @@ exclusive_shared_DSECD_nonDSECD <- rbind(
   D25046_variantgroup$exonic[,c(1:27)] %>% filter(Gene.refgene %in% exclusive_shared_DSECD_nonDSECD),
   D25046_variantgroup$UTR[,c(1:27)] %>% filter(Gene.refgene %in% exclusive_shared_DSECD_nonDSECD),
   D25046_GeneList$Af_splicing[,c(1:27)] %>% filter(Gene.refgene %in% exclusive_shared_DSECD_nonDSECD)
-) %>% distinct(Gene.refgene, .keep_all = TRUE)
+)
 
 ## Save the results to Excel files
 wb <- createWorkbook()
