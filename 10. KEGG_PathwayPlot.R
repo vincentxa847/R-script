@@ -5,18 +5,26 @@ library(pathview)
 # This visualization includes all genes with variant(s), regardless of the type or number of variants they have.
 # Genes with available CADD scores will be highlighted in the plot.
 # -----------------------------------------------------------------------------
-kegg_genesWithVariant_CADD <- function(sample, table_name, pathway_id, output_dir) {
-  # Extract relevant columns: Gene.refgene and CADD_phred
-  gene_cadd_df <- sample[[table_name]][, c("Gene.refgene", "CADD_phred")]
+kegg_genesWithVariant_CADD <- function(sample, table_name, pathway_id, output_dir, isTable=FALSE) {
+  
+  # WHERE TABLE RATHER THAN LIST INPUT
+  if (isTable) {
+    # Extract relevant columns: Gene.refgene and CADD_phred
+    gene_cadd_df <- sample[, c("Gene.refgene", "CADD_phred")]
+  }
+  else{
+    # Extract relevant columns: Gene.refgene and CADD_phred
+    gene_cadd_df <- sample[[table_name]][, c("Gene.refgene", "CADD_phred")]
+  }
   # Handle CADD value
   gene_cadd_df$CADD_phred[gene_cadd_df$CADD_phred == "."] <- 0
   gene_cadd_df$CADD_phred <- as.numeric(gene_cadd_df$CADD_phred)
-
+  
   # Check if all CADD_phred values are zero (no CADD score), which will cause pathview fail
   if (all(gene_cadd_df$CADD_phred == 0)) {
     message("All CADD_phred values are zero. Assigning 0.001 to the first gene for visualization.")
     gene_cadd_df$CADD_phred[1] <- 0.001  # Assign 0.001 to the first row
-    }
+  }
   
   # Remove duplicates based on Gene.refgene and CADD_phred
   unique_gene_cadd_df <- unique(gene_cadd_df)
@@ -29,7 +37,7 @@ kegg_genesWithVariant_CADD <- function(sample, table_name, pathway_id, output_di
   
   # Merge Entrez IDs with CADD_phred values
   entrez_genes <- merge(entrez_genes, unique_gene_cadd_df, by.x = "SYMBOL", by.y = "Gene.refgene")
-
+  
   # Filter rows where CADD_phred is not zero
   non_zero_cadd_genes <- entrez_genes[entrez_genes$CADD_phred != 0, ]
   
@@ -39,7 +47,7 @@ kegg_genesWithVariant_CADD <- function(sample, table_name, pathway_id, output_di
   
   # Create a named vector with Entrez IDs as names and CADD_phred as values
   gene_data <- setNames(entrez_genes$CADD_phred, entrez_genes$ENTREZID)
-
+  
   # Store the current working directory
   original_wd <- getwd()
   
@@ -50,7 +58,7 @@ kegg_genesWithVariant_CADD <- function(sample, table_name, pathway_id, output_di
   
   # Visualize the pathway, using CADD_phred scores for highlighting the genes
   pathview::pathview(gene.data = gene_data, pathway.id = pathway_id, species = "hsa", gene.idtype = "ENTREZID", 
-           limit = list(gene = c(min(gene_data, na.rm = TRUE), max(gene_data, na.rm = TRUE))))
+                     limit = list(gene = c(min(gene_data, na.rm = TRUE), max(gene_data, na.rm = TRUE))))
   
   # Revert back to the original working directory
   setwd(original_wd)
@@ -95,3 +103,21 @@ kegg_genesWithVariant_CADD(D25046_GeneList, "hsa04340_hedgedog", "hsa04340", "..
 kegg_genesWithVariant_CADD(D25046_GeneList, "hsa04020_calcium_signaling", "hsa04020", "../DS-ECD/D25046/")
 kegg_genesWithVariant_CADD(D25046_GeneList, "hsa04350_TGFbeta", "hsa04350", "../DS-ECD/D25046/")
 
+# Exclusively Gene.refgene in DS-ECD and DS-nonECD
+kegg_genesWithVariant_CADD(exclusive_refgene_DSECD, "hsa04310_Wnt", "hsa04310", "../EXCLUDE_DS_GENE/exclusive_DSECD_NOTDSnonECD/",TRUE)
+kegg_genesWithVariant_CADD(exclusive_refgene_DSnonECD, "hsa04310_Wnt", "hsa04310", "../EXCLUDE_DS_GENE/exclusive_DSnonECD_NOTDSECD/",TRUE)
+
+kegg_genesWithVariant_CADD(exclusive_refgene_DSECD, "hsa04330_Notch", "hsa04330", "../EXCLUDE_DS_GENE/exclusive_DSECD_NOTDSnonECD/",TRUE)
+kegg_genesWithVariant_CADD(exclusive_refgene_DSnonECD, "hsa04330_Notch", "hsa04330", "../EXCLUDE_DS_GENE/exclusive_DSnonECD_NOTDSECD/",TRUE)
+
+kegg_genesWithVariant_CADD(exclusive_refgene_DSECD, "hsa04340_hedgedog", "hsa04340", "../EXCLUDE_DS_GENE/exclusive_DSECD_NOTDSnonECD/",TRUE)
+kegg_genesWithVariant_CADD(exclusive_refgene_DSnonECD, "hsa04340_hedgedog", "hsa04340", "../EXCLUDE_DS_GENE/exclusive_DSnonECD_NOTDSECD/",TRUE)
+
+kegg_genesWithVariant_CADD(exclusive_refgene_DSECD, "hsa04020_calcium_signaling", "hsa04020", "../EXCLUDE_DS_GENE/exclusive_DSECD_NOTDSnonECD/",TRUE)
+kegg_genesWithVariant_CADD(exclusive_refgene_DSnonECD, "hsa04020_calcium_signaling", "hsa04020", "../EXCLUDE_DS_GENE/exclusive_DSnonECD_NOTDSECD/",TRUE)
+
+kegg_genesWithVariant_CADD(exclusive_refgene_DSECD, "hsa04350_TGFbeta", "hsa04350", "../EXCLUDE_DS_GENE/exclusive_DSECD_NOTDSnonECD/",TRUE)
+kegg_genesWithVariant_CADD(exclusive_refgene_DSnonECD, "hsa04350_TGFbeta", "hsa04350", "../EXCLUDE_DS_GENE/exclusive_DSnonECD_NOTDSECD/",TRUE)
+
+kegg_genesWithVariant_CADD(exclusive_refgene_DSECD, "hsa04390_Hippo", "hsa04390", "../EXCLUDE_DS_GENE/exclusive_DSECD_NOTDSnonECD/",TRUE)
+kegg_genesWithVariant_CADD(exclusive_refgene_DSnonECD, "hsa04390_Hippo", "hsa04390", "../EXCLUDE_DS_GENE/exclusive_DSnonECD_NOTDSECD/",TRUE)
