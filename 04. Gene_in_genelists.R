@@ -119,7 +119,7 @@ summarize_by_gene_variant <- function(df) {
 }
 
 # Function to include variants in gene list and produce EXCEL output
-gene_list <- function(input, gene_list, output_name) {
+gene_list <- function(input, gene_list, output_name, full_ouput=FALSE) {
   
   if (!"Gene.refgene" %in% colnames(input)) {
     stop("The input data does not contain a column named 'Gene.refgene'.")
@@ -198,6 +198,11 @@ gene_list <- function(input, gene_list, output_name) {
   
   ## EXCEL output
   wb <- createWorkbook() # Create a workbook for the Excel output
+  # For share or exclusive variants where need original table
+  if(full_ouput){ 
+    addWorksheet(wb, "Variants")
+    writeData(wb, "Variants", input)
+  }
   # write genesymbol worksheet
   addWorksheet(wb, "GENESYMBOL OF GENELIST")
   writeData(wb, "GENESYMBOL OF GENELIST", gene_refgene_df)
