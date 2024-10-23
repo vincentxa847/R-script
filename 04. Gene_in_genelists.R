@@ -167,6 +167,9 @@ gene_list <- function(input, gene_list, output_name) {
   gene_list_variant$chr21 <- input %>% filter(Chr == "21")
   # 18. Novel Variant (MAF is 0 and no RSID)
   gene_list_variant$Novel <- input %>% filter(as.numeric(Max.Allele.Freq) == 0 & dbSNP == ".")
+  # 19. Affect splicing (SpliceAI ≥0.5)
+  gene_list_variant$Af_splicing <- input %>% filter(as.numeric(SpliceAI_DS_AG) >= 0.5 | as.numeric(SpliceAI_DS_AL) >= 0.5 |
+                                                    as.numeric(SpliceAI_DS_DG) >= 0.5 | as.numeric(SpliceAI_DS_DL) >= 0.5)
   
   
   ## Prepare genesymbol worksheet and Sort each group by CADD_phred
