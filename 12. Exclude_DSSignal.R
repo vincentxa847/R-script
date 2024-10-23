@@ -77,13 +77,9 @@ exclusive_shared_DSECD_nonDSECD <- rbind(
   D25046_GeneList$Af_splicing[,c(1:27)] %>% filter(Gene.refgene %in% exclusive_shared_DSECD_nonDSECD)
 )
 
-## Save the results to Excel files
-wb <- createWorkbook()
-addWorksheet(wb, "exclusivegene_DSECD")
-writeData(wb, "exclusivegene_DSECD", exclusive_refgene_DSECD, startRow = 1, startCol = 1)
-saveWorkbook(wb, "../EXCLUDE_DS_GENE/exclusivegene_DSECD.xlsx", overwrite = TRUE)
-
-wb <- createWorkbook()
-addWorksheet(wb, "exclusive_shared_DSECD_nonDSECD")
-writeData(wb, "exclusive_shared_DSECD_nonDSECD", exclusive_shared_DSECD_nonDSECD, startRow = 1, startCol = 1)
-saveWorkbook(wb, "../EXCLUDE_DS_GENE/exclusive_shared_DSECD_nonDSECD.xlsx", overwrite = TRUE)
+# -----------------------------------------------------------------------------
+# Save the results to Excel files
+# -----------------------------------------------------------------------------
+# function "gene_list" from 04 
+gene_list(exclusive_refgene_DSECD,gene_lists,"../EXCLUDE_DS_GENE/exclusivegene_DSECD.xlsx",TRUE)
+gene_list(exclusive_shared_DSECD_nonDSECD,gene_lists,"../EXCLUDE_DS_GENE/exclusive_shared_DSECD_nonDSECD.xlsx",TRUE)
