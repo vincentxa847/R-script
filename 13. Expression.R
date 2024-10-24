@@ -1,9 +1,8 @@
 library(dplyr)
 
-
 # -------------------------------------------------------------------
 # Usage of expression data
-# Reference :  
+# Reference : Single-Cell Transcriptome Analysis Maps the Developmental Track of the Human Heart (Cell Rep. 2019)
 # -------------------------------------------------------------------
 
 # Step 1: List all files in the directory
