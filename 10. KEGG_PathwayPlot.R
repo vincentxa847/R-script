@@ -65,6 +65,43 @@ kegg_genesWithVariant_CADD <- function(sample, table_name, pathway_id, output_di
 }
 
 # -----------------------------------------------------------------------------
+# Plot custom input gene in KEGG plot in current directory
+# -----------------------------------------------------------------------------
+
+kegg_customGene <- function(Genes, pathway_id, output_dir) {
+  # Convert gene symbols to Entrez IDs
+  entrez_genes <- clusterProfiler::bitr(Genes, 
+                                        fromType = "SYMBOL", 
+                                        toType = "ENTREZID", 
+                                        OrgDb = org.Hs.eg.db)
+  
+  # Print the SYMBOL and ENTREZID values
+  message("Genes and ENTREZID:")
+  print(entrez_genes)
+  
+  # Create a named vector with ENTREZID and assign dummy values (e.g., 1) for visualization
+  gene_data <- setNames(rep(1, nrow(entrez_genes)), entrez_genes$ENTREZID)
+  
+  # Create directory if it doesn't exist
+  dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
+  
+  # Visualize the pathway by highlighting the genes
+  pathview::pathview(gene.data = gene_data, 
+                     pathway.id = pathway_id, 
+                     species = "hsa", 
+                     gene.idtype = "ENTREZID", 
+                     out.suffix = "custom",   # Add a suffix to the output file
+                     kegg.dir = output_dir,   # Save results in output directory
+                     limit = list(gene = c(0, 1)))  # Set gene limits to dummy values (for visualization)
+}
+
+# Call the function with the gene list and pathway ID
+kegg_customGene(c("YAP1",
+                  "PPP2R1B"
+), 
+                "hsa04390", "./tmp")
+
+# -----------------------------------------------------------------------------
 #### Usage ####
 # -----------------------------------------------------------------------------
 ## nonDS-ECD
